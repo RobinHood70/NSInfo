@@ -58,12 +58,12 @@ class NSInfoNamespace
 	#region Constructor
 	public function __construct($nsOrBase, $pageName = '')
 	{
-		global $wgContLang;
+		$contLang = VersionHelper::getInstance()->getContentLanguage();
 
 		if (is_int($nsOrBase)) {
 			$this->nsId = $nsOrBase;
 			$this->pageName = $pageName;
-			$nsName = $wgContLang->getNsText($nsOrBase);
+			$nsName = $contLang->getNsText($nsOrBase);
 			$this->base = strlen($this->pageName)
 				? "{$nsName}:{$this->pageName}"
 				: $nsName;
@@ -148,11 +148,11 @@ class NSInfoNamespace
 
 	public static function fromNamespace(int $nsId, ?string $pageName = ''): NSInfoNamespace
 	{
-		global $wgContLang;
+		$contLang = VersionHelper::getInstance()->getContentLanguage();
 
 		$nsId = MWNamespace::getSubject($nsId);
 		$nsInfo = new NSInfoNamespace($nsId, $pageName);
-		$nsInfo->base = $wgContLang->getFormattedNsText($nsId);
+		$nsInfo->base = $contLang->getFormattedNsText($nsId);
 		$nsInfo->category = $nsInfo->base;
 		$nsInfo->gameSpace = $nsInfo->nsId > 100 && $nsInfo->nsId < 400 && $nsInfo->nsId !== 200;
 		$nsInfo->id = $nsInfo->getDefaultId();
