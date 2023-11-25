@@ -1,0 +1,48 @@
+{
+	"name": "Namespace Info",
+	"description": "Enhances namespaces by adding associated information",
+	"version": "1.0",
+	"author": [
+		"RobinHood70"
+	],
+	"url": "https://en.uesp.net/wiki/UESPWiki:Namespace_Info",
+	"license-name": "GPL-2.0-or-later",
+	"manifest_version": 1,
+	"requires": {
+		"MediaWiki": ">= 1.28.0"
+	},
+	"type": "parserhook",
+	"AutoloadClasses": {
+		"NSInfo": "includes/NSInfo.php",
+		"NSInfoHooks": "includes/NSInfoHooks.php",
+		"NSInfoNamespace": "includes/NSInfoNamespace.php",
+		"NSInfoSql": "includes/NSInfoSql.php"
+	},
+	"ExtensionMessagesFiles": {
+		"NSInfoAlias": "i18n/NSInfo.i18n.alias.php",
+		"NSInfoMagic": "i18n/NSInfo.i18n.magic.php"
+	},
+	"Hooks": {
+		"LoadExtensionSchemaUpdates": "NSInfoHooks::onLoadExtensionSchemaUpdates",
+		"MagicWordwgVariableIDs": "NSInfoHooks::onMagicWordwgVariableIDs",
+		"ParserFirstCallInit": "NSInfoHooks::onParserFirstCallInit",
+		"ParserGetVariableValueSwitch": "NSInfoHooks::onParserGetVariableValueSwitch"
+	},
+	"MessagesDirs": {
+		"NSInfo": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.nsinfo.specialpage": {
+			"styles": "nsinfo.css"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "NSInfo/modules"
+	},
+	"SpecialPages": {
+		"NSInfoEditor": "SpecialNSInfoEditor"
+	}
+}
