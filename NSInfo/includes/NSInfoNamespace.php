@@ -1,57 +1,46 @@
 <?php
 
+use MediaWiki\Linker\LinkTarget;
+
 class NSInfoNamespace
 {
-	#region Private Constants
-	private const TRACKING_BASE = 'MediaWiki:nsinfo-';
-	#endregion
-
 	#region Private Static Fields
 	/** @var NSInfoNamespace $empty */
 	private static $empty;
 	#endregion
 
 	#region Private Fields
-	/** @var string $base */
+	/** @var string $base The full text name of the (pseudo-)namespace without a trailing colon or slash. */
 	private $base = '';
 
-	/** @var string $category */
+	/** @var string $category The text to be used in category names. */
 	private $category = '';
 
-	/** @var bool $gameSpace */
-	private $gameSpace = true;
+	/** @var bool $gamespace Whether the (pseudo-)namespace counts as being in game space. */
+	private $gamespace = true;
 
-	/** @var string $id */
+	/** @var string $id The shortened text ID of the (pseudo-)namespace. */
 	private $id = '';
 
-	/** @var string $mainPage */
+	/** @var string $mainPage The main page for the (pseudo-)namespace. */
 	private $mainPage = '';
 
-	/** @var string $name */
+	/** @var string $name The friendly name of the (pseudo-)namespace. */
 	private $name = '';
 
-	/** @var int $nsId */
+	/** @var int|bool $nsId The numerical MediaWiki ID of the namespace or false if the requested namespace was invalid. */
 	private $nsId;
 
-	/** @var int $originalNsId */
-	private $originalNsId;
-
-	/** @var string $originalPageName */
-	private $originalPageName;
-
-	/** @var string $pageName */
+	/** @var string $pageName The pagename of the pseudo-namespace; otherwise an empty string. */
 	private $pageName;
 
-	/** @var string $parent */
+	/** @var string $parent The parent namespace if this is a child (pseudo-)namespace. */
 	private $parent = '';
 
-	/** @var NSInfoNamespace[] $subSpaces */
+	/** @var NSInfoNamespace[] $subSpaces Any pseudo-namespaces belonging in a given root namespace. */
 	private $subSpaces = [];
 
-	/** @var Title $tracking */
-	private $tracking = '';
-
-	/** @var string $trail */
+	/** @var string $trail The trail to use for pages in this (pseudo-)namespace. */
 	private $trail = '';
 	#endregion
 
@@ -61,33 +50,23 @@ class NSInfoNamespace
 		$contLang = VersionHelper::getInstance()->getContentLanguage();
 
 		if (is_int($nsOrBase)) {
-			$this->nsId = $nsOrBase;
-			$this->pageName = $pageName;
+			$this->pageName = $pageName ?? '';
 			$nsName = $contLang->getNsText($nsOrBase);
-			$this->base = strlen($this->pageName)
-				? "{$nsName}:{$this->pageName}"
-				: $nsName;
+			if ($nsName) {
+				$this->nsId = $nsOrBase;
+				$this->base = strlen($this->pageName)
+					? "{$nsName}:{$this->pageName}"
+					: $nsName;
+			} else {
+				$this->nsId = false;
+			}
 		} else {
-			$exploded = explode(
-				':',
-				$nsOrBase,
-				2
-			);
-
+			$exploded = explode(':', $nsOrBase, 2);
 			$nsId = VersionHelper::getInstance()->getContentLanguage()->getNsIndex(strtr($exploded[0], ' ', '_'));
 			$this->nsId = $nsId;
 			$this->pageName = count($exploded) > 1 ? $exploded[1] : '';
 			$this->base = $nsOrBase;
 		}
-
-		$trackingPage = self::TRACKING_BASE . $this->nsId;
-		if ($this->pageName) {
-			$trackingPage .= '-' . $this->pageName;
-		}
-
-		$this->tracking = Title::newFromText($trackingPage);
-		$this->originalNsId = $this->nsId;
-		$this->originalPageName = $this->pageName;
 	}
 	#endregion
 
@@ -110,42 +89,14 @@ class NSInfoNamespace
 	}
 
 	/**
-	 * Creates a new nsId info from an old-style text line.
+	 * Returns default namespace information from a namespace ID.
 	 *
-	 * @param string $line The line to parse.
+	 * @param int $nsId
+	 * @param string|null $pageName
 	 *
 	 * @return NSInfoNamespace
+	 *
 	 */
-	public static function fromLine(string $line): NSInfoNamespace
-	{
-		#RHDebug::show("\n\n=== Line ===\n", $line);
-		$fields = array_map('trim', explode(';', $line));
-		$fieldCount = count($fields);
-		$nsInfo = new NSInfoNamespace($fields[0]);
-		$nsInfo->id = ($fieldCount > 1 && strlen($fields[1]) > 0)
-			? $fields[1]
-			: $nsInfo->getDefaultId();
-		#RHDebug::show('id', $nsInfo->id);
-		$nsInfo->parent = ($fieldCount > 2 && strlen($fields[2]) > 0)
-			? $fields[2]
-			: $nsInfo->base;
-		$nsInfo->name = ($fieldCount > 3 && strlen($fields[3]) > 0)
-			? $fields[3]
-			: $nsInfo->base;
-		$nsInfo->mainPage = ($fieldCount > 4 && strlen($fields[4]) > 0)
-			? $fields[4]
-			: $nsInfo->buildMainPage($nsInfo->name);
-		$nsInfo->category = ($fieldCount > 5 && strlen($fields[5]) > 0)
-			? $fields[5]
-			: $nsInfo->base;
-		$nsInfo->trail = ($fieldCount > 6 && strlen($fields[6]) > 0)
-			? $fields[6]
-			: $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
-		$nsInfo->gameSpace = $nsInfo->nsId > 100 && $nsInfo->nsId < 400 && $nsInfo->nsId !== 200;
-
-		return $nsInfo;
-	}
-
 	public static function fromNamespace(int $nsId, ?string $pageName = ''): NSInfoNamespace
 	{
 		$contLang = VersionHelper::getInstance()->getContentLanguage();
@@ -154,7 +105,7 @@ class NSInfoNamespace
 		$nsInfo = new NSInfoNamespace($nsId, $pageName);
 		$nsInfo->base = $contLang->getFormattedNsText($nsId);
 		$nsInfo->category = $nsInfo->base;
-		$nsInfo->gameSpace = $nsInfo->nsId > 100 && $nsInfo->nsId < 400 && $nsInfo->nsId !== 200;
+		$nsInfo->gamespace = $nsInfo->getDefaultGamespace();
 		$nsInfo->id = $nsInfo->getDefaultId();
 		$nsInfo->name = $nsInfo->base;
 		$nsInfo->parent = $nsInfo->base;
@@ -164,30 +115,63 @@ class NSInfoNamespace
 		return $nsInfo;
 	}
 
-	public static function fromRow(array $row): NSInfoNamespace
+	public static function fromRow(string $row): ?NSInfoNamespace
 	{
-		$nsInfo = new NSInfoNamespace((int)$row[NSInfoSql::FIELD_INDEX], $row[NSInfoSql::FIELD_PAGENAME]);
-		$nsInfo->base = $row[NSInfoSql::FIELD_BASE];
-		$nsInfo->category = $row[NSInfoSql::FIELD_CATEGORY];
-		$nsInfo->gameSpace = $row[NSInfoSql::FIELD_GAMESPACE];
-		$nsInfo->id = $row[NSInfoSql::FIELD_ID];
-		$nsInfo->mainPage = $row[NSInfoSql::FIELD_MAIN_PAGE];
-		$nsInfo->name = $row[NSInfoSql::FIELD_NAME];
-		$nsInfo->parent = $row[NSInfoSql::FIELD_PARENT];
-		$nsInfo->trail = $row[NSInfoSql::FIELD_TRAIL];
+		if (($row[0] ?? '') !== '|') {
+			return null;
+		}
+
+		$row = substr($row, 1);
+		$row = str_replace('||', '\n|', $row);
+		$fields = explode('\n|', $row);
+		$fields = array_map('trim', $fields);
+		$fields = array_pad($fields, 8, '');
+
+		$nsInfo = new NSInfoNamespace($fields[0]);
+		if ($nsInfo->getNsId() === false) {
+			return null;
+		}
+
+		$nsInfo->id = strlen($fields[1])
+			? $fields[1]
+			: $nsInfo->getDefaultId();
+		$nsInfo->parent = strlen($fields[2])
+			? $fields[2]
+			: $nsInfo->base;
+		$nsInfo->name = strlen($fields[3])
+			? $fields[3]
+			: $nsInfo->base;
+		$nsInfo->mainPage = strlen($fields[4])
+			? $fields[4]
+			: $nsInfo->buildMainPage($nsInfo->name);
+		$nsInfo->category = strlen($fields[5])
+			? $fields[5]
+			: $nsInfo->base;
+		$nsInfo->trail = strlen($fields[6])
+			? $fields[6]
+			: $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
+		$nsInfo->gamespace = strlen($fields[7])
+			? filter_var($fields[7], FILTER_VALIDATE_BOOLEAN)
+			: $nsInfo->getDefaultGamespace();
 
 		return $nsInfo;
+	}
+
+	public function getDefaultGamespace()
+	{
+		// The IDs listed are the preferred custom namespace ranges for all wikis and are not UESP-specific. The idea here is to make the "No" namespaces explicit in the table.
+		$id = $this->nsId;
+		return ($id >= 100 && $id < 200) ||
+			($id >= 3000 && $id < 5000);
 	}
 	#endregion
 
 	#region Public Functions
 	public function addSubSpace(NSInfoNamespace $subSpace)
 	{
-		if ($subSpace->nsId !== $this->nsId) {
-			throw new Exception('Invalid subspace for current namespace.');
+		if ($subSpace->nsId === $this->nsId && $this->nsId !== false) {
+			$this->subSpaces[$subSpace->pageName] = $subSpace;
 		}
-
-		$this->subSpaces[$subSpace->pageName] = $subSpace;
 	}
 
 	public function buildMainPage(string $name): string
@@ -222,7 +206,7 @@ class NSInfoNamespace
 
 	public function getGameSpace(): bool
 	{
-		return $this->gameSpace;
+		return $this->gamespace;
 	}
 
 	public function getId(): string
@@ -245,11 +229,12 @@ class NSInfoNamespace
 		return $this->name;
 	}
 
-	public function getNsId(bool $original = false): int
+	/**
+	 * @return int|bool
+	 */
+	public function getNsId()
 	{
-		return $original
-			? $this->originalNsId
-			: $this->nsId;
+		return $this->nsId;
 	}
 
 	public function getParent(): string
@@ -257,9 +242,9 @@ class NSInfoNamespace
 		return $this->parent;
 	}
 
-	public function getPageName(bool $original = false): string
+	public function getPageName(): string
 	{
-		return ($original ? $this->originalPageName : $this->pageName) ?? '';
+		return $this->pageName;
 	}
 
 	/**
@@ -272,40 +257,16 @@ class NSInfoNamespace
 		return $this->subSpaces;
 	}
 
-	public function getTracking(): Title
-	{
-		return $this->tracking;
-	}
-
 	public function getTrail(): string
 	{
 		return $this->trail;
 	}
 
-	public function savePage(User $user): void
+	public function sortSubSpaces(): void
 	{
-		$gameSpace = $this->gameSpace ? 'Yes' : 'No';
-		$text =
-			"This page collects all [[Special:WhatLinksHere/{{FULLPAGENAME}}|back links]] coming from the [[MediaWiki:Namespace Info|Namespace Info]] parser functions for the namespace listed below. Note that the {{Pl|{{FULLPAGENAME}}|edit history|action=history}} is purely for tracking changes made using [[Special:NSInfo|the editor]]. It's entirely system maintained and editing this page will have no effect on anything.\n\n" .
-			"===Namespace Info===\n" .
-			"'''NS_NAME''': {$this->name}<br>\n" .
-			"'''NS_ID''': {$this->id}<br>\n" .
-			"'''NS_BASE''': {$this->base}<br>\n" .
-			"'''NS_CATEGORY''': {$this->category}<br>\n" .
-			"'''NS_MAINPAGE''': [[{$this->mainPage}]]<br>\n" .
-			"'''NS_PARENT''': {$this->parent}<br>\n" .
-			"'''NS_TRAIL''': {$this->trail}<br>\n" .
-			"'''GAMESPACE''': {$gameSpace}";
-
-		$content = new WikitextContent($text);
-		$page = WikiPage::factory($this->tracking);
-		$page->doEditContent(
-			$content,
-			'Namespace updated',
-			EDIT_SUPPRESS_RC | EDIT_INTERNAL,
-			false,
-			$user
-		);
+		usort($this->subSpaces, function ($a, $b) {
+			return mb_strlen($b) <=> mb_strlen($a);
+		});
 	}
 	#endregion
 }

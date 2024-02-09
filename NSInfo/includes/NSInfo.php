@@ -26,6 +26,9 @@ class NSInfo
 	public const PF_NS_NAME = 'NS_NAME';
 	public const PF_NS_PARENT = 'NS_PARENT';
 	public const PF_NS_TRAIL = 'NS_TRAIL';
+
+	private const NSLIST = 'MediaWiki:nsinfo-namespacelist'; //Could be made into a variable if really needed.
+	private const OLDLIST = 'MediaWiki:Uespnamespacelist';
 	#endregion
 
 	#region Private Static Variables
@@ -37,6 +40,50 @@ class NSInfo
 	#endregion
 
 	#region Public Static Functions
+	public static function convertOld()
+	{
+		$nsList = Title::newFromText(self::NSLIST);
+		if ($nsList->exists()) {
+			return;
+		}
+
+		$title = Title::newFromText(self::OLDLIST);
+		$oldList = new WikiPage($title);
+		if (!$oldList->exists()) {
+			return;
+		}
+
+		// TODO: Something in here causes preferences not to be saved.
+		$rev = VersionHelper::getInstance()->getLatestRevision($oldList);
+		$text = $rev->getSerializedData();
+		$lines = explode("\n", $text);
+		$user = User::newSystemUser('MediaWiki default', ['steal' => true]);
+		$rows = [];
+		foreach ($lines as $line) {
+			$line = preg_replace('/\s*<\s*\/?\s*pre(\s+[^>]*>|>)\s*/', '', trim($line));
+			if (substr($line, 0, 1) !== '#' && strlen($line) > 0) {
+				$fields = explode(';', $line);
+				$fields = array_map('trim', $fields);
+				$fields = array_pad($fields, 8, '');
+				$row = '| ' . implode(' || ', $fields);
+				$rows[] = $row;
+			}
+		}
+
+		$list = implode("\n|-\n", $rows);
+		$msg = Message::newFromSpecifier('nsinfo-nslist-pagetext')->params($list);
+		$pageText = $msg->text();
+		$content = new WikitextContent($pageText);
+		$page = WikiPage::factory($nsList);
+		$page->doEditContent(
+			$content,
+			'Namespaces updated',
+			EDIT_SUPPRESS_RC | EDIT_INTERNAL,
+			false,
+			$user
+		);
+	}
+
 	public static function doGameSpace(Parser $parser, PPFrame $frame, array $args): bool
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
@@ -55,7 +102,7 @@ class NSInfo
 		return $ns->getBase();
 	}
 
-	public static function doNsCategory(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsCategory(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getCategory();
@@ -73,7 +120,7 @@ class NSInfo
 		$ns = self::getNsInfo($parser, $frame);
 		$prefix = $ns->getCategory();
 		$sortkey = count($args) > 1
-			? '|' . trim($frame->expand($args[1]))
+			? ('|' . trim($frame->expand($args[1])))
 			: '';
 
 		return "[[$catspace:$prefix-$page$sortkey]]";
@@ -124,10 +171,10 @@ class NSInfo
 	 *
 	 * @return NSInfoNamespace
 	 */
-	public static function getNsInfo(Parser $parser, PPFrame $frame, array $args = null): NSInfoNamespace
+	public static function getNsInfo(Parser $parser, PPFrame $frame, ?array $args = null): NSInfoNamespace
 	{
 		if (is_null(self::$info)) {
-			self::$info = NSInfoSql::getInstance()->getNamespaceInfo();
+			self::$info = self::getNsMessage();
 		}
 
 		/** @var Title $title */
@@ -154,9 +201,9 @@ class NSInfo
 				}
 
 				$title = $frame->getTitle();
-				if (!$title) {
-					// RHDebug::writeFile('Frame didn\'t have title either.');
-				}
+				// if (!$title) {
+				// RHDebug::writeFile('Frame didn\'t have title either.');
+				// }
 			}
 		} else {
 			$ns = self::nsFromArg($arg);
@@ -173,9 +220,10 @@ class NSInfo
 			return NSInfoNamespace::empty();
 		}
 
-		$articleId = $title->getArticleId();
-		if ($articleId > 0 && isset(self::$cache[$articleId])) {
-			return self::$cache[$articleId];
+		$dbKey = $title->getDBkey();
+		if ($dbKey > 0 && isset(self::$cache[$dbKey])) {
+			// We don't need to worry about adding a backlink, since being in the cache means it's already backlinked.
+			return self::$cache[$dbKey];
 		}
 
 		$index = $title->getNamespace();
@@ -191,7 +239,6 @@ class NSInfo
 			self::$info[$index] = $ns;
 		}
 
-		/** @var NSInfoNamespace $ns */
 		$subSpaces = $ns->getSubSpaces();
 		if (count($subSpaces)) {
 			$longest = 0;
@@ -206,13 +253,69 @@ class NSInfo
 			}
 		}
 
-		if ($articleId > 0) {
-			self::$cache[$articleId] = $ns;
+		if ($dbKey) {
+			self::$cache[$dbKey] = $ns;
 		}
 
-		$link = $ns->getTracking();
-		$parser->getOutput()->addTemplate($link, $link->getArticleID(), $link->getLatestRevID());
+		$title = Title::newFromText(self::NSLIST);
+		$parser->getOutput()->addTemplate($title, $title->getArticleID(), $title->getLatestRevID());
 		return $ns;
+	}
+
+	/**
+	 * Gets the namespace info from the relevant MediaWiki-space message.
+	 *
+	 * @return NSInfoNamespace[]
+	 */
+	public static function getNsMessage(): array
+	{
+		$list = Title::newFromText(self::NSLIST);
+		$page = WikiPage::factory($list);
+		$rev = VersionHelper::getInstance()->getLatestRevision($page);
+		$text = $rev ? $rev->getSerializedData() : '';
+		$text = preg_match('/\bid=["\']?nsinfo-table["\']?\b.*\|}/s', $text, $matches)
+			? substr($matches[0], 0, strlen($matches[0]) - 3)
+			: '';
+		$rows = explode("\n|-", $text);
+		$retval = [];
+		$subSpaces = [];
+		if ($rows) {
+			array_shift($rows);
+			foreach ($rows as $row) {
+				$newRow = explode("\n", $row);
+				$newRow = $newRow[count($newRow) - 1];
+				$ns = NSInfoNamespace::fromRow($newRow);
+				if ($ns) {
+					if ($ns->getPageName()) {
+						$subSpaces[] = $ns;
+					} else {
+						$retval[$ns->getNsId()] = $ns;
+					}
+				}
+			}
+
+			foreach ($subSpaces as $subSpace) {
+				$nsId = $subSpace->getNsId();
+				if ($nsId !== false) {
+					$ns = $retval[$nsId] ?? null;
+					if (is_null($ns)) {
+						$ns = NSInfoNamespace::fromNamespace($nsId);
+						$retval[$nsId] = $ns;
+					}
+
+					if ($ns->getNsId() !== false) {
+						$ns->addSubSpace($subSpace);
+					}
+				}
+			}
+
+			foreach ($retval as $ns) {
+				$ns->sortSubSpaces();
+			}
+		}
+
+		// RHDebug::show('Retval', $retval);
+		return $retval;
 	}
 
 	/**

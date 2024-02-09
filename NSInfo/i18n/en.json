@@ -4,5 +4,6 @@
 			"RobinHood70"
 		]
 	},
-	"nsinfo-nslink-emptypagename": "Invalid link - page name is empty."
+	"nsinfo-nslink-emptypagename": "Invalid link - page name is empty.",
+	"nsinfo-nslist-pagetext": "The following table lists the namespace information for the [https://en.uesp.net/wiki/Project:NSInfo NSInfo] extension. Note that only table and row formatting are supported; do '''not''' use cell formatting (<code>&#124; style=... &#124; Text</code>) or things will break. Cells may be separated either by <code>&#124;&#124;</code> on the same line or by <code>&#124;</code> on a new line, as usual.\n\nNS_BASE must always be specified. Other values that aren't specified will default to NS_BASE except as follows:\n{| class=wikitable\n! NS_ID\n| upper-case <code>NS_BASE</code>\n|-\n! NS_MAINPAGE\n| <code>NS_BASE</code> + <code>: or \\</code> + <code>NS_NAME</code>\n|-\n! NS_TRAIL\n|<nowiki>[[</nowiki><code>NS_MAINPAGE</code>{{Pipe}}<code>NS_NAME</code>]]\n|}\n\n==Namespaces==\n{| class=\"wikitable sortable\" id=nsinfo-table\n! NS_BASE !! NS_ID !! NS_PARENT !! NS_NAME !! NS_MAINPAGE !! NS_CATEGORY !! NS_TRAIL !! GAMESPACE\n|-\n$1\n|}"
 }

@@ -33,16 +33,8 @@
 			"i18n"
 		]
 	},
-	"ResourceModules": {
-		"ext.nsinfo.specialpage": {
-			"styles": "nsinfo.css"
-		}
-	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "modules",
 		"remoteExtPath": "NSInfo/modules"
-	},
-	"SpecialPages": {
-		"NSInfoEditor": "SpecialNSInfoEditor"
 	}
 }

@@ -8,16 +8,14 @@
  */
 class NSInfoHooks
 {
-	#region Public Static Functions
 	/**
-	 * Migrates the old MetaTemplate tables to new ones. The basic functionality is the same, but names and indeces
-	 * have been altered and the datestamp removed.
+	 * Migrates the old UespCustomCode data to the new page. Note that this does not actually update the database beyond page creation.
 	 *
 	 * @param DatabaseUpdater $updater
 	 */
 	public static function onLoadExtensionSchemaUpdates(DatabaseUpdater $updater): void
 	{
-		NSInfoSql::getInstance()->onLoadExtensionSchemaUpdates($updater);
+		NSInfo::convertOld();
 	}
 
 	/**
@@ -98,12 +96,7 @@ class NSInfoHooks
 
 				break;
 			case NSInfo::PF_NS_CATEGORY:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getCategory();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsCategory($parser, $frame);
 				break;
 			case NSInfo::PF_NS_FULL:
 				$ns = NSInfo::getNsInfo($parser, $frame);
@@ -153,6 +146,10 @@ class NSInfoHooks
 				}
 
 				break;
+		}
+
+		if ($ret) {
+			$variableCache[$magicWordId] = $ret;
 		}
 
 		return true;
