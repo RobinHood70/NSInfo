@@ -278,7 +278,7 @@ class NSInfo
 			: '';
 		$rows = explode("\n|-", $text);
 		$retval = [];
-		$subSpaces = [];
+		$subSpaceSets = [];
 		if ($rows) {
 			array_shift($rows);
 			foreach ($rows as $row) {
@@ -286,31 +286,21 @@ class NSInfo
 				$newRow = $newRow[count($newRow) - 1];
 				$ns = NSInfoNamespace::fromRow($newRow);
 				if ($ns) {
-					if ($ns->getPageName()) {
-						$subSpaces[] = $ns;
-					} else {
-						$retval[$ns->getNsId()] = $ns;
+					$nsId = $ns->getNsId();
+					if ($nsId !== false) {
+						if ($ns->getPageName()) {
+							$subSpaceSets[$nsId][] = $ns;
+						} else {
+							$retval[$nsId] = $ns;
+						}
 					}
 				}
 			}
 
-			foreach ($subSpaces as $subSpace) {
-				$nsId = $subSpace->getNsId();
+			foreach ($subSpaceSets as $nsId => $subSpaces) {
 				if ($nsId !== false) {
-					$ns = $retval[$nsId] ?? null;
-					if (is_null($ns)) {
-						$ns = NSInfoNamespace::fromNamespace($nsId);
-						$retval[$nsId] = $ns;
-					}
-
-					if ($ns->getNsId() !== false) {
-						$ns->addSubSpace($subSpace);
-					}
+					$retval[$nsId]->addSubSpaces($subSpaces);
 				}
-			}
-
-			foreach ($retval as $ns) {
-				$ns->sortSubSpaces();
 			}
 		}
 

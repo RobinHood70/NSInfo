@@ -167,11 +167,13 @@ class NSInfoNamespace
 	#endregion
 
 	#region Public Functions
-	public function addSubSpace(NSInfoNamespace $subSpace)
+	public function addSubSpaces(array $subSpaces)
 	{
-		if ($subSpace->nsId === $this->nsId && $this->nsId !== false) {
-			$this->subSpaces[$subSpace->pageName] = $subSpace;
-		}
+		usort($subSpaces, function ($a, $b) {
+			return mb_strlen($b->base) <=> mb_strlen($a->base);
+		});
+
+		$this->subSpaces = $subSpaces;
 	}
 
 	public function buildMainPage(string $name): string
@@ -260,13 +262,6 @@ class NSInfoNamespace
 	public function getTrail(): string
 	{
 		return $this->trail;
-	}
-
-	public function sortSubSpaces(): void
-	{
-		usort($this->subSpaces, function ($a, $b) {
-			return mb_strlen($b) <=> mb_strlen($a);
-		});
 	}
 	#endregion
 }
