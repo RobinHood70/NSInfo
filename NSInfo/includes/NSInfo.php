@@ -326,19 +326,16 @@ class NSInfo
 			return self::$info[strtolower($arg)];
 		}
 
-		// Is it an unrecognized namespace name or index?
+		// Is it a recognized namespace name?
 		$index = is_numeric($arg) ? (int)$arg : $wgContLang->getNsIndex($arg);
 		if ($index !== false) {
-			if ($index > 0) {
-				$index &= ~1;
-			}
-
-			// Is it the talk space of a recognized namespace?
+			$index = MWNamespace::getSubject($index);
+			// It was recognized by MediaWiki, but does NSInfo recognize it?
 			if (isset(self::$info[$index])) {
 				return self::$info[$index];
 			}
 
-			// It's an unrecognized namespace.
+			// It's a valid but previously unused namespace.
 			$ns = NSInfoNamespace::fromNamespace($index);
 			self::$info[$index] = $ns;
 			return $ns;
