@@ -84,19 +84,19 @@ class NSInfo
 		);
 	}
 
-	public static function doGameSpace(Parser $parser, PPFrame $frame, array $args): bool
+	public static function doGameSpace(Parser $parser, PPFrame $frame, ?array $args = null): bool
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getGameSpace();
 	}
 
-	public static function doModName(Parser $parser, PPFrame $frame, array $args): string
+	public static function doModName(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getModName();
 	}
 
-	public static function doNsBase(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsBase(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getBase();
@@ -126,37 +126,37 @@ class NSInfo
 		return "[[$catspace:$prefix-$page$sortkey]]";
 	}
 
-	public static function doNsFull(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsFull(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getFull();
 	}
 
-	public static function doNsId(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsId(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getId();
 	}
 
-	public static function doNsMainPage(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsMainPage(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getMainPage();
 	}
 
-	public static function doNsName(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsName(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getName();
 	}
 
-	public static function doNsParent(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsParent(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getParent();
 	}
 
-	public static function doNsTrail(Parser $parser, PPFrame $frame, array $args): string
+	public static function doNsTrail(Parser $parser, PPFrame $frame, ?array $args = null): string
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getTrail();

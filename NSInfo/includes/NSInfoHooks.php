@@ -72,86 +72,41 @@ class NSInfoHooks
 	{
 		switch ($magicWordId) {
 			case NSInfo::PF_GAMESPACE:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getGameSpace();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doGameSpace($parser, $frame);
 				break;
 			case NSInfo::PF_MOD_NAME:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getModName();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doModName($parser, $frame);
 				break;
 			case NSInfo::PF_NS_BASE:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getBase();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsBase($parser, $frame);
 				break;
 			case NSInfo::PF_NS_CATEGORY:
 				$ret = NSInfo::doNsCategory($parser, $frame);
 				break;
 			case NSInfo::PF_NS_FULL:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getFull();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsFull($parser, $frame);
 				break;
 			case NSInfo::PF_NS_ID:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getId();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsId($parser, $frame);
 				break;
 			case NSInfo::PF_NS_MAINPAGE:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getMainPage();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsMainPage($parser, $frame);
 				break;
 			case NSInfo::PF_NS_NAME:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getName();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsName($parser, $frame);
 				break;
 			case NSInfo::PF_NS_PARENT:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getParent();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsParent($parser, $frame);
 				break;
 			case NSInfo::PF_NS_TRAIL:
-				$ns = NSInfo::getNsInfo($parser, $frame);
-				if ($ns) {
-					$ret = $ns->getTrail();
-					$variableCache[$magicWordId] = $ret;
-				}
-
+				$ret = NSInfo::doNsTrail($parser, $frame);
+				break;
+			default:
+				$ret = "<Unhandled Magic Word: $magicWordId>";
 				break;
 		}
 
-		if ($ret) {
-			$variableCache[$magicWordId] = $ret;
-		}
-
+		$variableCache[$magicWordId] = $ret;
 		return true;
 	}
 	#endregion
