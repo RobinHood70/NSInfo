@@ -288,6 +288,7 @@ class NSInfo
 				if ($ns) {
 					$nsId = $ns->getNsId();
 					if ($nsId !== false) {
+						$retval[$ns->getId()] = $ns;
 						if ($ns->getPageName()) {
 							$subSpaceSets[$nsId][] = $ns;
 						} else {
@@ -309,8 +310,8 @@ class NSInfo
 	}
 
 	/**
-	 * Gets an NSInfoNamespace from the argument provided. Returns false if the argument doesn't correspond to a
-	 * recognized namespace or pseudo-namespace (e.g., a page name).
+	 * Tries to get an NSInfoNamespace from a namespace name, namespace index, ns_base, or ns_id. Returns the empty
+	 * namespace if the argument doesn't correspond to a recognized value.
 	 *
 	 * @param string $arg The argument to check.
 	 *
@@ -322,8 +323,8 @@ class NSInfo
 		global $wgContLang;
 
 		// Quick check: is it a recognized ns_base/ns_id/namespace index?
-		if (isset(self::$info[strtolower($arg)])) {
-			return self::$info[strtolower($arg)];
+		if (isset(self::$info[strtoupper($arg)])) {
+			return self::$info[strtoupper($arg)];
 		}
 
 		// Is it a recognized namespace name?
