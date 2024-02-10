@@ -23,7 +23,6 @@
 		"NSInfoMagic": "i18n/NSInfo.i18n.magic.php"
 	},
 	"Hooks": {
-		"LoadExtensionSchemaUpdates": "NSInfoHooks::onLoadExtensionSchemaUpdates",
 		"MagicWordwgVariableIDs": "NSInfoHooks::onMagicWordwgVariableIDs",
 		"ParserFirstCallInit": "NSInfoHooks::onParserFirstCallInit",
 		"ParserGetVariableValueSwitch": "NSInfoHooks::onParserGetVariableValueSwitch"

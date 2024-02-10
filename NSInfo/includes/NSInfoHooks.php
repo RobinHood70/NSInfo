@@ -9,16 +9,6 @@
 class NSInfoHooks
 {
 	/**
-	 * Migrates the old UespCustomCode data to the new page. Note that this does not actually update the database beyond page creation.
-	 *
-	 * @param DatabaseUpdater $updater
-	 */
-	public static function onLoadExtensionSchemaUpdates(DatabaseUpdater $updater): void
-	{
-		NSInfo::convertOld();
-	}
-
-	/**
 	 * Enables NSInfo's variables.
 	 *
 	 * @param array $aCustomVariableIds The list of custom variables to add to.

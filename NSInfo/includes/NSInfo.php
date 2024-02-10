@@ -27,8 +27,7 @@ class NSInfo
 	public const PF_NS_PARENT = 'NS_PARENT';
 	public const PF_NS_TRAIL = 'NS_TRAIL';
 
-	private const NSLIST = 'MediaWiki:nsinfo-namespacelist'; //Could be made into a variable if really needed.
-	private const OLDLIST = 'MediaWiki:Uespnamespacelist';
+	private const NSLIST = 'MediaWiki:Nsinfo-namespacelist'; //Could be made into a variable if really needed.
 	#endregion
 
 	#region Private Static Variables
@@ -40,50 +39,6 @@ class NSInfo
 	#endregion
 
 	#region Public Static Functions
-	public static function convertOld()
-	{
-		$nsList = Title::newFromText(self::NSLIST);
-		if ($nsList->exists()) {
-			return;
-		}
-
-		$title = Title::newFromText(self::OLDLIST);
-		$oldList = new WikiPage($title);
-		if (!$oldList->exists()) {
-			return;
-		}
-
-		// TODO: Something in here causes preferences not to be saved.
-		$rev = VersionHelper::getInstance()->getLatestRevision($oldList);
-		$text = $rev->getSerializedData();
-		$lines = explode("\n", $text);
-		$user = User::newSystemUser('MediaWiki default', ['steal' => true]);
-		$rows = [];
-		foreach ($lines as $line) {
-			$line = preg_replace('/\s*<\s*\/?\s*pre(\s+[^>]*>|>)\s*/', '', trim($line));
-			if (substr($line, 0, 1) !== '#' && strlen($line) > 0) {
-				$fields = explode(';', $line);
-				$fields = array_map('trim', $fields);
-				$fields = array_pad($fields, 8, '');
-				$row = '| ' . implode(' || ', $fields);
-				$rows[] = $row;
-			}
-		}
-
-		$list = implode("\n|-\n", $rows);
-		$msg = Message::newFromSpecifier('nsinfo-nslist-pagetext')->params($list);
-		$pageText = $msg->text();
-		$content = new WikitextContent($pageText);
-		$page = WikiPage::factory($nsList);
-		$page->doEditContent(
-			$content,
-			'Namespaces updated',
-			EDIT_SUPPRESS_RC | EDIT_INTERNAL,
-			false,
-			$user
-		);
-	}
-
 	public static function doGameSpace(Parser $parser, PPFrame $frame, ?array $args = null): bool
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
