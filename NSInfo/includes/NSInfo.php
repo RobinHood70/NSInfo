@@ -207,7 +207,7 @@ class NSInfo
 			}
 		} else {
 			$ns = self::nsFromArg($arg);
-			if ($ns !== false) {
+			if ($ns->getNsId() !== false) {
 				return $ns;
 			}
 
@@ -221,7 +221,7 @@ class NSInfo
 		}
 
 		$dbKey = $title->getDBkey();
-		if ($dbKey > 0 && isset(self::$cache[$dbKey])) {
+		if (isset(self::$cache[$dbKey])) {
 			// We don't need to worry about adding a backlink, since being in the cache means it's already backlinked.
 			return self::$cache[$dbKey];
 		}
@@ -317,7 +317,7 @@ class NSInfo
 	 * @return NSInfoNamespace|false
 	 *
 	 */
-	public static function nsFromArg(string $arg)
+	public static function nsFromArg(string $arg): NSInfoNamespace
 	{
 		global $wgContLang;
 
@@ -344,7 +344,7 @@ class NSInfo
 			return $ns;
 		}
 
-		return false;
+		return NSInfoNamespace::empty();
 	}
 	#endregion
 }

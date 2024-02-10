@@ -60,6 +60,10 @@ class NSInfoNamespace
 			} else {
 				$this->nsId = false;
 			}
+		} else if ($nsOrBase === false) {
+			$this->nsId = false;
+			$this->pageName = '';
+			$this->base = '';
 		} else {
 			$exploded = explode(':', $nsOrBase, 2);
 			$nsId = VersionHelper::getInstance()->getContentLanguage()->getNsIndex(strtr($exploded[0], ' ', '_'));
@@ -74,8 +78,7 @@ class NSInfoNamespace
 	public static function empty()
 	{
 		if (!isset(self::$empty)) {
-			$nsInfo = new NSInfoNamespace(0, '');
-			$nsInfo->base = '';
+			$nsInfo = new NSInfoNamespace(false, '');
 			$nsInfo->category = '';
 			$nsInfo->id = '';
 			$nsInfo->name = '';
