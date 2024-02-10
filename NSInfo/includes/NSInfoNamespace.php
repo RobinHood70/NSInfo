@@ -100,11 +100,12 @@ class NSInfoNamespace
 	 */
 	public static function fromNamespace(int $nsId, ?string $pageName = ''): NSInfoNamespace
 	{
-		$contLang = VersionHelper::getInstance()->getContentLanguage();
-
 		$nsId = MWNamespace::getSubject($nsId);
 		$nsInfo = new NSInfoNamespace($nsId, $pageName);
-		$nsInfo->base = $contLang->getFormattedNsText($nsId);
+		if ($nsInfo->getNsId() === false) {
+			return NSInfoNamespace::empty();
+		}
+
 		$nsInfo->category = $nsInfo->base;
 		$nsInfo->gamespace = $nsInfo->getDefaultGamespace();
 		$nsInfo->id = $nsInfo->getDefaultId();
@@ -112,7 +113,6 @@ class NSInfoNamespace
 		$nsInfo->parent = $nsInfo->base;
 		$nsInfo->mainPage = $nsInfo->buildMainPage($nsInfo->name);
 		$nsInfo->trail = $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
-
 		return $nsInfo;
 	}
 
