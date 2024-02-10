@@ -107,7 +107,7 @@ class NSInfoNamespace
 			return NSInfoNamespace::empty();
 		}
 
-		$nsInfo->category = $nsInfo->base;
+		$nsInfo->category = strtr($nsInfo->base, ':', '-');
 		$nsInfo->gamespace = $nsInfo->getDefaultGamespace();
 		$nsInfo->id = $nsInfo->getDefaultId();
 		$nsInfo->name = $nsInfo->base;
@@ -135,7 +135,7 @@ class NSInfoNamespace
 		}
 
 		$nsInfo->id = strlen($fields[1])
-			? $fields[1]
+			? strtoupper($fields[1])
 			: $nsInfo->getDefaultId();
 		$nsInfo->parent = strlen($fields[2])
 			? $fields[2]
@@ -148,7 +148,7 @@ class NSInfoNamespace
 			: $nsInfo->buildMainPage($nsInfo->name);
 		$nsInfo->category = strlen($fields[5])
 			? $fields[5]
-			: $nsInfo->base;
+			: strtr($nsInfo->base, ':', '-');
 		$nsInfo->trail = strlen($fields[6])
 			? $fields[6]
 			: $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
