@@ -51,6 +51,7 @@ class NSInfoNamespace
 			$this->pageName = $pageName ?? '';
 			$nsName = $contLang->getNsText($nsOrBase);
 			if ($nsName) {
+				$nsName = strtr($nsName, '_', ' ');
 				$this->nsId = $nsOrBase;
 				$this->base = strlen($this->pageName)
 					? "{$nsName}:{$this->pageName}"
