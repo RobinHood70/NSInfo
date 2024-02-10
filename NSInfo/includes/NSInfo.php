@@ -285,15 +285,13 @@ class NSInfo
 				$newRow = explode("\n", $row);
 				$newRow = $newRow[count($newRow) - 1];
 				$ns = NSInfoNamespace::fromRow($newRow);
-				if ($ns) {
-					$nsId = $ns->getNsId();
-					if ($nsId !== false) {
-						$retval[$ns->getId()] = $ns;
-						if ($ns->getPageName()) {
-							$pseudoSpaceSets[$nsId][] = $ns;
-						} else {
-							$retval[$nsId] = $ns;
-						}
+				$nsId = $ns->getNsId();
+				if ($nsId !== false) {
+					$retval[$ns->getId()] = $ns;
+					if ($ns->getPageName()) {
+						$pseudoSpaceSets[$nsId][] = $ns;
+					} else {
+						$retval[$nsId] = $ns;
 					}
 				}
 			}

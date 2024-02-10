@@ -117,10 +117,10 @@ class NSInfoNamespace
 		return $nsInfo;
 	}
 
-	public static function fromRow(string $row): ?NSInfoNamespace
+	public static function fromRow(string $row): NSInfoNamespace
 	{
 		if (($row[0] ?? '') !== '|') {
-			return null;
+			return NSInfoNamespace::empty();
 		}
 
 		$row = substr($row, 1);
@@ -131,7 +131,7 @@ class NSInfoNamespace
 
 		$nsInfo = new NSInfoNamespace($fields[0]);
 		if ($nsInfo->getNsId() === false) {
-			return null;
+			return $nsInfo;
 		}
 
 		$nsInfo->id = strlen($fields[1])
