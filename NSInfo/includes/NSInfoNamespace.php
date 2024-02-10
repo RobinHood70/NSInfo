@@ -99,10 +99,10 @@ class NSInfoNamespace
 	 * @return NSInfoNamespace
 	 *
 	 */
-	public static function fromNamespace(int $nsId, ?string $pageName = ''): NSInfoNamespace
+	public static function fromNamespace(int $nsId): NSInfoNamespace
 	{
 		$nsId = MWNamespace::getSubject($nsId);
-		$nsInfo = new NSInfoNamespace($nsId, $pageName);
+		$nsInfo = new NSInfoNamespace($nsId, '');
 		if ($nsInfo->getNsId() === false) {
 			return NSInfoNamespace::empty();
 		}
