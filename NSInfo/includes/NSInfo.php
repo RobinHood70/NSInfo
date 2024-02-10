@@ -163,8 +163,8 @@ class NSInfo
 	}
 
 	/**
-	 * Gets namespace information for the associated namespace or subspace. Namespaces not found in the table will be
-	 * set to default values.
+	 * Gets namespace information for the associated namespace or pseudo-namespace. Namespaces not found in the table
+	 * will be set to default values.
 	 *
 	 * @param \Parser $parser The parser in use.
 	 * @param \PPFrame $frame The frame in use.
@@ -239,16 +239,16 @@ class NSInfo
 			self::$info[$index] = $ns;
 		}
 
-		$subSpaces = $ns->getSubSpaces();
-		if (count($subSpaces)) {
+		$pseudoSpaces = $ns->getPseudoSpaces();
+		if (count($pseudoSpaces)) {
 			$longest = 0;
-			// Append slash to pagename and subspace so NS:ModSomething doesn't match NS:Mod.
+			// Append slash to pagename and pseudospace so NS:ModSomething doesn't match NS:Mod.
 			$pageName = $title->getText() . '/';
-			foreach ($subSpaces as $subSpace) {
-				$subSpaceName = $subSpace->getPageName() . '/';
-				$spaceLen = strlen($subSpaceName);
-				if ($spaceLen > $longest && strncmp($pageName, $subSpaceName, $spaceLen) === 0) {
-					$ns = $subSpace;
+			foreach ($pseudoSpaces as $pseudoSpace) {
+				$pseudoSpaceName = $pseudoSpace->getPageName() . '/';
+				$spaceLen = strlen($pseudoSpaceName);
+				if ($spaceLen > $longest && strncmp($pageName, $pseudoSpaceName, $spaceLen) === 0) {
+					$ns = $pseudoSpace;
 				}
 			}
 		}
@@ -278,7 +278,7 @@ class NSInfo
 			: '';
 		$rows = explode("\n|-", $text);
 		$retval = [];
-		$subSpaceSets = [];
+		$pseudoSpaceSets = [];
 		if ($rows) {
 			array_shift($rows);
 			foreach ($rows as $row) {
@@ -290,7 +290,7 @@ class NSInfo
 					if ($nsId !== false) {
 						$retval[$ns->getId()] = $ns;
 						if ($ns->getPageName()) {
-							$subSpaceSets[$nsId][] = $ns;
+							$pseudoSpaceSets[$nsId][] = $ns;
 						} else {
 							$retval[$nsId] = $ns;
 						}
@@ -298,9 +298,9 @@ class NSInfo
 				}
 			}
 
-			foreach ($subSpaceSets as $nsId => $subSpaces) {
+			foreach ($pseudoSpaceSets as $nsId => $pseudoSpaces) {
 				if ($nsId !== false) {
-					$retval[$nsId]->addSubSpaces($subSpaces);
+					$retval[$nsId]->addPseudoSpaces($pseudoSpaces);
 				}
 			}
 		}

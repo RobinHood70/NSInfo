@@ -1,7 +1,5 @@
 <?php
 
-use MediaWiki\Linker\LinkTarget;
-
 class NSInfoNamespace
 {
 	#region Private Static Fields
@@ -37,8 +35,8 @@ class NSInfoNamespace
 	/** @var string $parent The parent namespace if this is a child (pseudo-)namespace. */
 	private $parent = '';
 
-	/** @var NSInfoNamespace[] $subSpaces Any pseudo-namespaces belonging in a given root namespace. */
-	private $subSpaces = [];
+	/** @var NSInfoNamespace[] $pseudoSpaces Any pseudo-namespaces belonging in a given root namespace. */
+	private $pseudoSpaces = [];
 
 	/** @var string $trail The trail to use for pages in this (pseudo-)namespace. */
 	private $trail = '';
@@ -170,13 +168,13 @@ class NSInfoNamespace
 	#endregion
 
 	#region Public Functions
-	public function addSubSpaces(array $subSpaces)
+	public function addPseudoSpaces(array $pseudoSpaces)
 	{
-		usort($subSpaces, function ($a, $b) {
+		usort($pseudoSpaces, function ($a, $b) {
 			return mb_strlen($b->base) <=> mb_strlen($a->base);
 		});
 
-		$this->subSpaces = $subSpaces;
+		$this->pseudoSpaces = $pseudoSpaces;
 	}
 
 	public function buildMainPage(string $name): string
@@ -253,13 +251,13 @@ class NSInfoNamespace
 	}
 
 	/**
-	 * Gets any subspaces in this nsId.
+	 * Gets any pseudo-namespaces in this namespace.
 	 *
 	 * @return NSInfoNamespace[]
 	 */
-	public function getSubSpaces(): array
+	public function getPseudoSpaces(): array
 	{
-		return $this->subSpaces;
+		return $this->pseudoSpaces;
 	}
 
 	public function getTrail(): string
