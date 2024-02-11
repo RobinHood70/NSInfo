@@ -1,11 +1,5 @@
 <?php
 
-/** @todo Add {{#define/local/preview:a=b|c=d}} */
-/** @todo
- * This is essentially four extensions in one and if desired in the future, could be fairly readily split for more of a
- * single-purpse feel to each extension. Catpagetemplate would need a bit of work, as it's is a bit too coupled with
- * the data features right now, but a few hooks would probably take care of that.
- */
 class NSInfoHooks
 {
 	/**
