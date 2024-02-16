@@ -50,7 +50,7 @@ class NSInfoHooks
 	 * @param mixed $ret The return value.
 	 * @param PPFrame $frame The frame in use.
 	 *
-	 * @return bool Always true
+	 * @return true Always true
 	 */
 	public static function onParserGetVariableValueSwitch(Parser $parser, array &$variableCache, $magicWordId, &$ret, PPFrame $frame): bool
 	{
@@ -86,11 +86,13 @@ class NSInfoHooks
 				$ret = NSInfo::doNsTrail($parser, $frame);
 				break;
 			default:
-				$ret = "<Unhandled Magic Word: $magicWordId>";
-				break;
+				return true;
 		}
 
-		$variableCache[$magicWordId] = $ret;
+		if (isset($ret)) {
+			$parser->addTrackingCategory('nsinfo-tracking-variable');
+		}
+
 		return true;
 	}
 	#endregion

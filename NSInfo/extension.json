@@ -35,5 +35,8 @@
 	"ResourceFileModulePaths": {
 		"localBasePath": "modules",
 		"remoteExtPath": "NSInfo/modules"
-	}
+	},
+	"TrackingCategories": [
+		"nsinfo-tracking-variable"
+	]
 }

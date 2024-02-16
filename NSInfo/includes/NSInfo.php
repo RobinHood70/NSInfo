@@ -72,7 +72,7 @@ class NSInfo
 		}
 
 		$catspace = $wgContLang->getNsText(NS_CATEGORY);
-		$ns = self::getNsInfo($parser, $frame);
+		$ns = self::getNsInfo($parser, $frame, []);
 		$prefix = $ns->getCategory();
 		$sortkey = count($args) > 1
 			? ('|' . trim($frame->expand($args[1])))
@@ -132,18 +132,22 @@ class NSInfo
 			self::$info = self::getNsMessage();
 		}
 
+		$arg = is_null($args) ? '' : trim($frame->expand($args[0]));
+
 		/** @var Title $title */
 		/** @var PPTemplateFrame_Hash $frame */
-		if (is_null($args)) {
-			$arg = $frame->getNamedArgument(self::NA_NS_BASE);
-			if ($arg === false) {
-				$arg = $frame->getNamedArgument(self::NA_NS_ID);
+		if ($arg === '') {
+			$newArg = $frame->getNamedArgument(self::NA_NS_BASE);
+			if ($newArg === false) {
+				$newArg = $frame->getNamedArgument(self::NA_NS_ID);
 			}
-		} else {
-			$arg = trim($frame->expand($args[0]));
+
+			if ($newArg !== false) {
+				$arg = $newArg;
+			}
 		}
 
-		if ($arg === false) {
+		if ($arg === '') {
 			// We have no arguments or magic variables, so pull the info from the parser's Title object.
 			$title = $parser->getTitle();
 			if (!$title) {
