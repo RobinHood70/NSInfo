@@ -72,10 +72,10 @@ class NSInfo
 		}
 
 		$catspace = $wgContLang->getNsText(NS_CATEGORY);
-		$ns = self::getNsInfo($parser, $frame, []);
+		$ns = self::getNsInfo($parser, $frame);
 		$prefix = $ns->getCategory();
 		$sortkey = count($args) > 1
-			? ('|' . trim($frame->expand($args[1])))
+			? ('|' . $frame->expand($args[1]))
 			: '';
 
 		return "[[$catspace:$prefix-$page$sortkey]]";
