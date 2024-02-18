@@ -284,7 +284,7 @@ class NSInfo
 		}
 
 		// Is it a recognized namespace name?
-		$index = is_numeric($arg) ? (int)$arg : $wgContLang->getNsIndex($arg);
+		$index = is_numeric($arg) ? (int)$arg : $wgContLang->getNsIndex(strtr($arg, ' ', '_'));
 		if ($index === false) {
 			return NSInfoNamespace::empty();
 		}
