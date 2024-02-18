@@ -101,7 +101,7 @@ class NSInfoNamespace
 	 */
 	public static function fromNamespace(int $nsId): NSInfoNamespace
 	{
-		$nsId = MWNamespace::getSubject($nsId);
+		$nsId = VersionHelper::getNsSubject($nsId);
 		$nsInfo = new NSInfoNamespace($nsId, '');
 		if ($nsInfo->getNsId() === false) {
 			return NSInfoNamespace::empty();

@@ -134,12 +134,10 @@ class NSInfo
 
 		$arg = is_null($args) ? '' : trim($frame->expand($args[0]));
 
-		/** @var Title $title */
-		/** @var PPTemplateFrame_Hash $frame */
 		if ($arg === '') {
-			$newArg = $frame->getNamedArgument(self::NA_NS_BASE);
+			$newArg = $frame->getArgument(self::NA_NS_BASE);
 			if ($newArg === false) {
-				$newArg = $frame->getNamedArgument(self::NA_NS_ID);
+				$newArg = $frame->getArgument(self::NA_NS_ID);
 			}
 
 			if ($newArg !== false) {
@@ -149,7 +147,7 @@ class NSInfo
 
 		if ($arg === '') {
 			// We have no arguments or magic variables, so pull the info from the parser's Title object.
-			$title = $parser->getTitle();
+			$title = VersionHelper::getInstance()->getParserTitle($parser);
 			if (!$title) {
 				// RHDebug::writeFile(RHDebug::getStacktrace());
 				// RHDebug::writeFile('Parser didn\'t have title, trying frame.');
@@ -186,9 +184,7 @@ class NSInfo
 		}
 
 		$index = $title->getNamespace();
-		if ($index > 0) {
-			$index &= ~1;
-		}
+		$index = VersionHelper::getNsSubject($index);
 
 		// It's a title, so check the namespace and pagename and see if we can find a match.
 		if (isset(self::$info[$index])) {
@@ -201,8 +197,9 @@ class NSInfo
 		$pseudoSpaces = $ns->getPseudoSpaces();
 		if (count($pseudoSpaces)) {
 			$longest = 0;
-			// Append slash to pagename and pseudospace so NS:ModSomething doesn't match NS:Mod.
-			$pageName = $title->getText() . '/';
+			// Append slash to pagename and pseudospace so NS:ModSomething doesn't match NS:Mod. We use $dbKey for
+			// compatibility with PageReference.
+			$pageName = strtr($dbKey, '_', ' ') . '/';
 			foreach ($pseudoSpaces as $pseudoSpace) {
 				$pseudoSpaceName = $pseudoSpace->getPageName() . '/';
 				$spaceLen = strlen($pseudoSpaceName);
@@ -228,9 +225,10 @@ class NSInfo
 	 */
 	public static function getNsMessage(): array
 	{
+		$helper = VersionHelper::getInstance();
 		$list = Title::newFromText(self::NSLIST);
-		$page = WikiPage::factory($list);
-		$rev = VersionHelper::getInstance()->getLatestRevision($page);
+		$page = $helper->getWikiPage($list);
+		$rev = $helper->getLatestRevision($page);
 		$text = $rev ? $rev->getSerializedData() : '';
 		$text = preg_match('/\bid=["\']?nsinfo-table["\']?\b.*\|}/s', $text, $matches)
 			? substr($matches[0], 0, strlen($matches[0]) - 3)
@@ -277,6 +275,7 @@ class NSInfo
 	 */
 	public static function nsFromArg(string $arg): NSInfoNamespace
 	{
+		/** @var Language $wgContLang */
 		global $wgContLang;
 
 		// Quick check: is it a recognized ns_base/ns_id/namespace index?
@@ -286,20 +285,20 @@ class NSInfo
 
 		// Is it a recognized namespace name?
 		$index = is_numeric($arg) ? (int)$arg : $wgContLang->getNsIndex($arg);
-		if ($index !== false) {
-			$index = MWNamespace::getSubject($index);
-			// It was recognized by MediaWiki, but does NSInfo recognize it?
-			if (isset(self::$info[$index])) {
-				return self::$info[$index];
-			}
-
-			// It's a valid but previously unused namespace.
-			$ns = NSInfoNamespace::fromNamespace($index);
-			self::$info[$index] = $ns;
-			return $ns;
+		if ($index === false) {
+			return NSInfoNamespace::empty();
 		}
 
-		return NSInfoNamespace::empty();
+		$index = VersionHelper::getNsSubject($index);
+		// It was recognized by MediaWiki, but does NSInfo recognize it?
+		if (isset(self::$info[$index])) {
+			return self::$info[$index];
+		}
+
+		// It's a valid but previously unused namespace.
+		$ns = NSInfoNamespace::fromNamespace($index);
+		self::$info[$index] = $ns;
+		return $ns;
 	}
 	#endregion
 }
