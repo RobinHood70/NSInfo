@@ -65,13 +65,13 @@ class NSInfo
 
 	public static function doNsCatlink(Parser $parser, PPFrame $frame, array $args): string
 	{
-		global $wgContLang;
 		$page = trim($frame->expand($args[0]));
 		if ($page === '') {
 			return ParserHelper::error('nsinfo-nslink-emptypagename');
 		}
 
-		$catspace = $wgContLang->getNsText(NS_CATEGORY);
+		$contLang = VersionHelper::getInstance()->getContentLanguage();
+		$catspace = $contLang->getNsText(NS_CATEGORY);
 		$ns = self::getNsInfo($parser, $frame);
 		$prefix = $ns->getCategory();
 		$sortkey = count($args) > 1
@@ -226,10 +226,8 @@ class NSInfo
 	public static function getNsMessage(): array
 	{
 		$helper = VersionHelper::getInstance();
-		$list = Title::newFromText(self::NSLIST);
-		$page = $helper->getWikiPage($list);
-		$rev = $helper->getLatestRevision($page);
-		$text = $rev ? $rev->getSerializedData() : '';
+		$title = Title::newFromText(self::NSLIST);
+		$text = $helper->getPageText($title) ?? '';
 		$text = preg_match('/\bid=["\']?nsinfo-table["\']?\b.*\|}/s', $text, $matches)
 			? substr($matches[0], 0, strlen($matches[0]) - 3)
 			: '';
@@ -275,16 +273,14 @@ class NSInfo
 	 */
 	public static function nsFromArg(string $arg): NSInfoNamespace
 	{
-		/** @var Language $wgContLang */
-		global $wgContLang;
-
 		// Quick check: is it a recognized ns_base/ns_id/namespace index?
 		if (isset(self::$info[strtoupper($arg)])) {
 			return self::$info[strtoupper($arg)];
 		}
 
 		// Is it a recognized namespace name?
-		$index = is_numeric($arg) ? (int)$arg : $wgContLang->getNsIndex(strtr($arg, ' ', '_'));
+		$contLang = VersionHelper::getInstance()->getContentLanguage();
+		$index = is_numeric($arg) ? (int)$arg : $contLang->getNsIndex(strtr($arg, ' ', '_'));
 		if ($index === false) {
 			return NSInfoNamespace::empty();
 		}
