@@ -225,7 +225,12 @@ class NSInfoNamespace
 
 	public function getModName(): string
 	{
-		return end(explode('/', $this->pageName));
+		if ($this->pageName === '') {
+			return '';
+		}
+
+		$exploded = explode('/', $this->pageName);
+		return end($exploded);
 	}
 
 	public function getName(): string
