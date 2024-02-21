@@ -194,7 +194,8 @@ class NSInfo
 			}
 		}
 
-		if ($dbKey) {
+		// BUG: Conditioned out for now to test if this is the source of the incorrect namespaces bug.
+		if (false && $dbKey) {
 			self::$cache[$dbKey] = $ns;
 		}
 
