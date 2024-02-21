@@ -9,7 +9,7 @@ class NSInfoNamespace
 
 	#region Private Fields
 	/** @var string $base The full text name of the (pseudo-)namespace without a trailing colon or slash. */
-	private $base = '';
+	private $base;
 
 	/** @var string $category The text to be used in category names. */
 	private $category = '';
