@@ -54,55 +54,42 @@ class NSInfoHooks
 	 */
 	public static function onParserGetVariableValueSwitch(Parser $parser, array &$variableCache, $magicWordId, &$ret, PPFrame $frame): bool
 	{
-		$track = false;
 		switch ($magicWordId) {
 			case NSInfo::PF_GAMESPACE:
 				$ret = NSInfo::doGameSpace($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_MOD_NAME:
 				$ret = NSInfo::doModName($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_BASE:
 				$ret = NSInfo::doNsBase($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_CATEGORY:
 				$ret = NSInfo::doNsCategory($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_FULL:
 				$ret = NSInfo::doNsFull($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_ID:
 				$ret = NSInfo::doNsId($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_MAINPAGE:
 				$ret = NSInfo::doNsMainPage($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_NAME:
 				$ret = NSInfo::doNsName($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_PARENT:
 				$ret = NSInfo::doNsParent($parser, $frame);
-				$track = true;
 				break;
 			case NSInfo::PF_NS_TRAIL:
 				$ret = NSInfo::doNsTrail($parser, $frame);
-				$track = true;
 				break;
 			default:
 				return true;
 		}
 
-		if ($track) {
-			$parser->addTrackingCategory('nsinfo-tracking-variable');
-		}
+		$parser->addTrackingCategory('nsinfo-tracking-variable');
 
 		return true;
 	}
