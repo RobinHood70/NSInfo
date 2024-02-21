@@ -10,8 +10,6 @@
 class NSInfo
 {
 	#region Public Constants
-	public const KEY_NSINFO = '@nsinfo';
-
 	public const NA_NS_BASE = 'ns_base';
 	public const NA_NS_ID = 'ns_id';
 
@@ -118,73 +116,60 @@ class NSInfo
 	}
 
 	/**
-	 * Gets namespace information for the associated namespace or pseudo-namespace. Namespaces not found in the table
-	 * will be set to default values.
+	 * Tries to get an NSInfoNamespace from a namespace name, namespace index, ns_base, or ns_id. Returns the empty
+	 * namespace if the argument doesn't correspond to a recognized value.
 	 *
-	 * @param \Parser $parser The parser in use.
-	 * @param \PPFrame $frame The frame in use.
+	 * @param string $arg The argument to check.
 	 *
-	 * @return NSInfoNamespace
+	 * @return NSInfoNamespace|false
+	 *
 	 */
-	public static function getNsInfo(Parser $parser, PPFrame $frame, ?array $args = null): NSInfoNamespace
+	public static function nsFromArg(string $arg): NSInfoNamespace
 	{
+		// In case this is called externally, initialize info.
 		if (is_null(self::$info)) {
 			self::$info = self::getNsMessage();
 		}
 
-		$arg = is_null($args) ? '' : trim($frame->expand($args[0]));
-
-		if ($arg === '') {
-			$newArg = $frame->getArgument(self::NA_NS_BASE);
-			if ($newArg === false) {
-				$newArg = $frame->getArgument(self::NA_NS_ID);
-			}
-
-			if ($newArg !== false) {
-				$arg = $newArg;
-			}
+		// Quick check: is it a recognized ns_base/ns_id/namespace index?
+		$upperArg = strtoupper($arg);
+		if (isset(self::$info[$upperArg])) {
+			return self::$info[$upperArg];
 		}
 
-		if ($arg === '') {
-			// We have no arguments or magic variables, so pull the info from the parser's Title object.
-			$title = VersionHelper::getInstance()->getParserTitle($parser);
-			if (!$title) {
-				// RHDebug::writeFile(RHDebug::getStacktrace());
-				// RHDebug::writeFile('Parser didn\'t have title, trying frame.');
-				// In the rare event parser doesn't return a title, try the frame, since that's a required parameter in
-				// the call chain to get here.
-				while ($frame->parent) {
-					$frame = $frame->parent;
-				}
-
-				$title = $frame->getTitle();
-				// if (!$title) {
-				// RHDebug::writeFile('Frame didn\'t have title either.');
-				// }
-			}
-		} else {
-			$ns = self::nsFromArg($arg);
-			if ($ns->getNsId() !== false) {
-				return $ns;
-			}
-
-			// If none of the above, assume it's a Title.
-			$title = Title::newFromText($arg);
-		}
-
-		if (!$title) {
-			// If we somehow failed to get a title, abort.
+		// Is it a recognized namespace name?
+		$contLang = VersionHelper::getInstance()->getContentLanguage();
+		$index = is_numeric($arg) ? (int)$arg : $contLang->getNsIndex(strtr($arg, ' ', '_'));
+		if ($index === false) {
 			return NSInfoNamespace::empty();
 		}
 
+		$index = VersionHelper::getNsSubject($index);
+		// It was recognized by MediaWiki, but does NSInfo recognize it?
+		if (isset(self::$info[$index])) {
+			return self::$info[$index];
+		}
+
+		// It's a valid but previously unused namespace.
+		$ns = NSInfoNamespace::fromNamespace($index);
+		self::$info[$index] = $ns;
+
+		return $ns;
+	}
+
+	public static function nsFromTitle(Title $title): NSInfoNamespace
+	{
 		$dbKey = $title->getDBkey();
 		if (isset(self::$cache[$dbKey])) {
-			// We don't need to worry about adding a backlink, since being in the cache means it's already backlinked.
 			return self::$cache[$dbKey];
 		}
 
 		$index = $title->getNamespace();
 		$index = VersionHelper::getNsSubject($index);
+
+		if (is_null(self::$info)) {
+			self::$info = self::getNsMessage();
+		}
 
 		// It's a title, so check the namespace and pagename and see if we can find a match.
 		if (isset(self::$info[$index])) {
@@ -213,9 +198,66 @@ class NSInfo
 			self::$cache[$dbKey] = $ns;
 		}
 
-		$title = Title::newFromText(self::NSLIST);
-		$parser->getOutput()->addTemplate($title, $title->getArticleID(), $title->getLatestRevID());
 		return $ns;
+	}
+	#endregion
+
+	#region Private Static Functions
+	/**
+	 * Gets namespace information for the associated namespace or pseudo-namespace. Namespaces not found in the table
+	 * will be set to default values.
+	 *
+	 * @param \Parser $parser The parser in use.
+	 * @param \PPFrame $frame The frame in use.
+	 *
+	 * @return NSInfoNamespace
+	 */
+	private static function getNsInfo(Parser $parser, PPFrame $frame, ?array $args = null): NSInfoNamespace
+	{
+		$arg = is_null($args) ? '' : trim($frame->expand($args[0]));
+
+		if ($arg === '') {
+			$newArg = $frame->getArgument(self::NA_NS_BASE);
+			if ($newArg === false) {
+				$newArg = $frame->getArgument(self::NA_NS_ID);
+			}
+
+			if ($newArg !== false) {
+				$arg = $newArg;
+			}
+		}
+
+		if ($arg === '') {
+			// We have no arguments or magic variables, so pull the info from the parser's Title object.
+			$title = VersionHelper::getInstance()->getParserTitle($parser);
+			if (!$title) {
+				// In the rare event parser doesn't return a title, try the frame, since that's a required parameter in
+				// the call chain to get here.
+				while ($frame->parent) {
+					$frame = $frame->parent;
+				}
+
+				$title = $frame->getTitle();
+			}
+		} else {
+			$ns = self::nsFromArg($arg);
+			if ($ns->getNsId() !== false) {
+				return $ns;
+			}
+
+			// If none of the above, assume it's a Title.
+			$title = Title::newFromText($arg);
+		}
+
+		if (!$title) {
+			// If we somehow failed to get a title, abort.
+			return NSInfoNamespace::empty();
+		}
+
+		$list = Title::newFromText(self::NSLIST);
+		$parser->getOutput()->addTemplate($list, $list->getArticleID(), $list->getLatestRevID());
+
+		return self::nsFromTitle($title);
 	}
 
 	/**
@@ -223,7 +265,7 @@ class NSInfo
 	 *
 	 * @return NSInfoNamespace[]
 	 */
-	public static function getNsMessage(): array
+	private static function getNsMessage(): array
 	{
 		$helper = VersionHelper::getInstance();
 		$title = Title::newFromText(self::NSLIST);
@@ -260,41 +302,6 @@ class NSInfo
 
 		// RHDebug::show('Retval', $retval);
 		return $retval;
-	}
-
-	/**
-	 * Tries to get an NSInfoNamespace from a namespace name, namespace index, ns_base, or ns_id. Returns the empty
-	 * namespace if the argument doesn't correspond to a recognized value.
-	 *
-	 * @param string $arg The argument to check.
-	 *
-	 * @return NSInfoNamespace|false
-	 *
-	 */
-	public static function nsFromArg(string $arg): NSInfoNamespace
-	{
-		// Quick check: is it a recognized ns_base/ns_id/namespace index?
-		if (isset(self::$info[strtoupper($arg)])) {
-			return self::$info[strtoupper($arg)];
-		}
-
-		// Is it a recognized namespace name?
-		$contLang = VersionHelper::getInstance()->getContentLanguage();
-		$index = is_numeric($arg) ? (int)$arg : $contLang->getNsIndex(strtr($arg, ' ', '_'));
-		if ($index === false) {
-			return NSInfoNamespace::empty();
-		}
-
-		$index = VersionHelper::getNsSubject($index);
-		// It was recognized by MediaWiki, but does NSInfo recognize it?
-		if (isset(self::$info[$index])) {
-			return self::$info[$index];
-		}
-
-		// It's a valid but previously unused namespace.
-		$ns = NSInfoNamespace::fromNamespace($index);
-		self::$info[$index] = $ns;
-		return $ns;
 	}
 	#endregion
 }
