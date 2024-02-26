@@ -205,6 +205,10 @@ class NSInfoNamespace
 
 	public function getFull(): string
 	{
+		if ($this->base === '') {
+			return '';
+		}
+
 		return $this->base . (strlen($this->pageName) ? '/' : ':');
 	}
 
