@@ -28,17 +28,17 @@ class NSInfoHooks
 	 */
 	public static function onParserFirstCallInit(Parser $parser): void
 	{
-		$parser->setFunctionHook(NSInfo::PF_GAMESPACE, 'NSInfo::doGameSpace', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_MOD_NAME, 'NSInfo::doModName', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_BASE, 'NSInfo::doNsBase', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_CATEGORY, 'NSInfo::doNsCategory', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_CATLINK, 'NSInfo::doNsCatlink', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_FULL, 'NSInfo::doNsFull', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_ID, 'NSInfo::doNsId', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_MAINPAGE, 'NSInfo::doNsMainPage', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_NAME, 'NSInfo::doNsName', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_PARENT, 'NSInfo::doNsParent', SFH_OBJECT_ARGS | SFH_NO_HASH);
-		$parser->setFunctionHook(NSInfo::PF_NS_TRAIL, 'NSInfo::doNsTrail', SFH_OBJECT_ARGS | SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_GAMESPACE, 'NSInfo::doGameSpace', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_MOD_NAME, 'NSInfo::doModName', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_BASE, 'NSInfo::doNsBase', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_CATEGORY, 'NSInfo::doNsCategory', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_CATLINK, 'NSInfo::doNsCatlink', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_FULL, 'NSInfo::doNsFull', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_ID, 'NSInfo::doNsId', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_MAINPAGE, 'NSInfo::doNsMainPage', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_NAME, 'NSInfo::doNsName', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_PARENT, 'NSInfo::doNsParent', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_NS_TRAIL, 'NSInfo::doNsTrail', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 	}
 
 	/**
