@@ -159,9 +159,9 @@ class NSInfo
 
 	public static function nsFromTitle(Title $title): NSInfoNamespace
 	{
-		$dbKey = $title->getDBkey();
-		if (isset(self::$cache[$dbKey])) {
-			return self::$cache[$dbKey];
+		$id = $title->getArticleID();
+		if (isset(self::$cache[$id])) {
+			return self::$cache[$id];
 		}
 
 		$index = $title->getNamespace();
@@ -184,7 +184,7 @@ class NSInfo
 			$longest = 0;
 			// Append slash to pagename and pseudospace so NS:ModSomething doesn't match NS:Mod. We use $dbKey for
 			// compatibility with PageReference.
-			$pageName = strtr($dbKey, '_', ' ') . '/';
+			$pageName = $title->getText() . '/';
 			foreach ($pseudoSpaces as $pseudoSpace) {
 				$pseudoSpaceName = $pseudoSpace->getPageName() . '/';
 				$spaceLen = strlen($pseudoSpaceName);
@@ -194,9 +194,8 @@ class NSInfo
 			}
 		}
 
-		// BUG: Conditioned out for now to test if this is the source of the incorrect namespaces bug.
-		if (false && $dbKey) {
-			self::$cache[$dbKey] = $ns;
+		if ($id) {
+			self::$cache[$id] = $ns;
 		}
 
 		return $ns;
