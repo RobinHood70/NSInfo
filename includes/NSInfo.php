@@ -279,7 +279,7 @@ class NSInfo
 		if ($rows) {
 			array_shift($rows);
 			foreach ($rows as $row) {
-				$newRow = explode("\n", $row);
+				$newRow = explode("\n", $row, 2);
 				$newRow = $newRow[count($newRow) - 1];
 				$ns = NSInfoNamespace::fromRow($newRow);
 				$nsId = $ns->getNsId();
