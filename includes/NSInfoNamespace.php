@@ -77,14 +77,7 @@ class NSInfoNamespace
 	public static function empty()
 	{
 		if (!isset(self::$empty)) {
-			$nsInfo = new NSInfoNamespace(false, '');
-			$nsInfo->category = '';
-			$nsInfo->id = '';
-			$nsInfo->name = '';
-			$nsInfo->parent = '';
-			$nsInfo->mainPage = '';
-			$nsInfo->trail = '';
-			self::$empty = $nsInfo;
+			self::$empty = new NSInfoNamespace(false, '');
 		}
 
 		return self::$empty;
@@ -109,7 +102,7 @@ class NSInfoNamespace
 
 		$nsInfo->category = strtr($nsInfo->base, ':', '-');
 		$nsInfo->gamespace = $nsInfo->getDefaultGamespace();
-		$nsInfo->id = $nsInfo->getDefaultId();
+		$nsInfo->id = $nsInfo->base;
 		$nsInfo->name = $nsInfo->base;
 		$nsInfo->parent = $nsInfo->base;
 		$nsInfo->mainPage = $nsInfo->buildMainPage($nsInfo->name);
@@ -134,9 +127,9 @@ class NSInfoNamespace
 			return $nsInfo;
 		}
 
-		$nsInfo->id = strlen($fields[1])
-			? strtoupper($fields[1])
-			: $nsInfo->getDefaultId();
+		$nsInfo->id = strtoupper(strlen($fields[1])
+			? $fields[1]
+			: $nsInfo->base);
 		$nsInfo->parent = strlen($fields[2])
 			? $fields[2]
 			: $nsInfo->base;
@@ -196,11 +189,6 @@ class NSInfoNamespace
 	public function getCategory(): string
 	{
 		return $this->category;
-	}
-
-	public function getDefaultId(): string
-	{
-		return strtoupper($this->base);
 	}
 
 	public function getFull(): string
