@@ -15,6 +15,7 @@ class NSInfo
 
 	public const PF_GAMESPACE = 'GAMESPACE';
 	public const PF_MOD_NAME = 'MOD_NAME';
+	public const PF_MOD_PARENT = 'MOD_PARENT';
 	public const PF_NS_BASE = 'NS_BASE';
 	public const PF_NS_CATEGORY = 'NS_CATEGORY';
 	public const PF_NS_CATLINK = 'NS_CATLINK';
@@ -47,6 +48,12 @@ class NSInfo
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
 		return $ns->getModName();
+	}
+
+	public static function doModParent(Parser $parser, PPFrame $frame, ?array $args = null): string
+	{
+		$ns = self::getNsInfo($parser, $frame, $args);
+		return $ns->getModParent();
 	}
 
 	public static function doNsBase(Parser $parser, PPFrame $frame, ?array $args = null): string
@@ -157,7 +164,15 @@ class NSInfo
 		return $ns;
 	}
 
-	public static function nsFromTitle(Title $title): NSInfoNamespace
+	/**
+	 * Given a title, finds the appropriate (pseudo-)namespace for that title.
+	 *
+	 * @param Title|PageReference $title
+	 *
+	 * @return NSInfoNamespace
+	 *
+	 */
+	public static function nsFromTitle($title): NSInfoNamespace
 	{
 		$id = $title->getArticleID();
 		if (isset(self::$cache[$id])) {
@@ -255,7 +270,9 @@ class NSInfo
 		}
 
 		$list = Title::newFromText(self::NSLIST);
-		$parser->getOutput()->addTemplate($list, $list->getArticleID(), $list->getLatestRevID());
+		if ($list) {
+			$parser->getOutput()->addTemplate($list, $list->getArticleID(), $list->getLatestRevID());
+		}
 
 		return self::nsFromTitle($title);
 	}
@@ -285,10 +302,10 @@ class NSInfo
 				$nsId = $ns->getNsId();
 				if ($nsId !== false) {
 					$retval[$ns->getId()] = $ns;
-					if ($ns->getPageName()) {
-						$pseudoSpaceSets[$nsId][] = $ns;
-					} else {
+					if ($ns->getPageName() === '') {
 						$retval[$nsId] = $ns;
+					} else {
+						$pseudoSpaceSets[$nsId][] = $ns;
 					}
 				}
 			}

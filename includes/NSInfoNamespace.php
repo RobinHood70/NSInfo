@@ -2,6 +2,10 @@
 
 class NSInfoNamespace
 {
+	#region Public Constants
+	public const FIELD_COUNT = 9;
+	#endregion
+
 	#region Private Static Fields
 	/** @var NSInfoNamespace $empty */
 	private static $empty;
@@ -22,6 +26,9 @@ class NSInfoNamespace
 
 	/** @var string $mainPage The main page for the (pseudo-)namespace. */
 	private $mainPage = '';
+
+	/** @var string $modBase The base mod namespace if this is a child mod. */
+	private $modParent = '';
 
 	/** @var string $name The friendly name of the (pseudo-)namespace. */
 	private $name = '';
@@ -50,12 +57,15 @@ class NSInfoNamespace
 		if (is_int($nsOrBase)) {
 			$this->pageName = $pageName ?? '';
 			$nsName = $contLang->getNsText($nsOrBase);
-			if ($nsName) {
+			if ($nsName !== false) {
 				$nsName = strtr($nsName, '_', ' ');
 				$this->nsId = $nsOrBase;
-				$this->base = strlen($this->pageName)
-					? "{$nsName}:{$this->pageName}"
-					: $nsName;
+				if ($this->pageName === '') {
+					$this->base = $nsName;
+				} else {
+					$this->base = "{$nsName}:{$this->pageName}";
+					$this->modParent = $nsName;
+				}
 			} else {
 				$this->nsId = false;
 			}
@@ -67,8 +77,13 @@ class NSInfoNamespace
 			$exploded = explode(':', $nsOrBase, 2);
 			$nsId = VersionHelper::getInstance()->getContentLanguage()->getNsIndex(strtr($exploded[0], ' ', '_'));
 			$this->nsId = $nsId;
-			$this->pageName = count($exploded) > 1 ? $exploded[1] : '';
 			$this->base = $nsOrBase;
+			if (count($exploded) === 2) {
+				$this->modParent = $exploded[0];
+				$this->pageName = $exploded[1];
+			} else {
+				$this->pageName = '';
+			}
 		}
 	}
 	#endregion
@@ -120,7 +135,7 @@ class NSInfoNamespace
 		$row = str_replace('||', '\n|', $row);
 		$fields = explode('\n|', $row);
 		$fields = array_map('trim', $fields);
-		$fields = array_pad($fields, 8, '');
+		$fields = array_pad($fields, self::FIELD_COUNT, '');
 
 		$nsInfo = new NSInfoNamespace($fields[0]);
 		if ($nsInfo->getNsId() === false) {
@@ -148,6 +163,9 @@ class NSInfoNamespace
 		$nsInfo->gamespace = strlen($fields[7])
 			? filter_var($fields[7], FILTER_VALIDATE_BOOLEAN)
 			: $nsInfo->getDefaultGamespace();
+		if ($nsInfo->pageName !== '' && strlen($fields[8])) {
+			$nsInfo->modParent = $fields[8];
+		}
 
 		return $nsInfo;
 	}
@@ -223,6 +241,11 @@ class NSInfoNamespace
 
 		$exploded = explode('/', $this->pageName);
 		return end($exploded);
+	}
+
+	public function getModParent(): string
+	{
+		return $this->modParent;
 	}
 
 	public function getName(): string

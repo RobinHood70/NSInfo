@@ -30,6 +30,7 @@ class NSInfoHooks
 	{
 		$parser->setFunctionHook(NSInfo::PF_GAMESPACE, 'NSInfo::doGameSpace', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_MOD_NAME, 'NSInfo::doModName', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_MOD_PARENT, 'NSInfo::doModParent', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_NS_BASE, 'NSInfo::doNsBase', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_NS_CATEGORY, 'NSInfo::doNsCategory', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_NS_CATLINK, 'NSInfo::doNsCatlink', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
@@ -60,6 +61,9 @@ class NSInfoHooks
 				break;
 			case NSInfo::PF_MOD_NAME:
 				$ret = NSInfo::doModName($parser, $frame);
+				break;
+			case NSInfo::PF_MOD_PARENT:
+				$ret = NSInfo::doModParent($parser, $frame);
 				break;
 			case NSInfo::PF_NS_BASE:
 				$ret = NSInfo::doNsBase($parser, $frame);
