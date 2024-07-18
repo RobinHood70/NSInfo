@@ -42,7 +42,7 @@ class ApiQueryNSInfo extends ApiQueryBase
 	#region Public Override Functions
 	public function execute()
 	{
-		$nsNamespaces = NSInfo::getNsMessage(true);
+		$nsNamespaces = NSInfo::getNsMessage();
 		$result = $this->getResult();
 		foreach ($nsNamespaces as $key => $ns) {
 			if (is_numeric($key)) {
@@ -60,7 +60,6 @@ class ApiQueryNSInfo extends ApiQueryBase
 
 			$pageName = $ns->getPageName();
 			$data = [
-				'base' => $ns->getBase(),
 				'category' => $ns->getCategory(),
 				'full' => $ns->getFull(),
 				'gamespace' => $ns->getGameSpace(),
@@ -74,9 +73,10 @@ class ApiQueryNSInfo extends ApiQueryBase
 				'nsid' => $ns->getNsId(),
 				'pagename' => $pageName,
 				'parent' => $ns->getParent(),
-				'pseudospace' => $ns->isPseudoSpace(),
+				'pseudospace' => $ns->getIsPseudoSpace(),
+				'trail' => $ns->getTrail(),
 			];
-			$result->addValue(['query', $this->getModuleName()], null, $data);
+			$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
 		}
 	}
 
