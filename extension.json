@@ -23,7 +23,6 @@
 		"NSInfoSql": "includes/NSInfoSql.php"
 	},
 	"ExtensionMessagesFiles": {
-		"NSInfoAlias": "i18n/NSInfo.i18n.alias.php",
 		"NSInfoMagic": "i18n/NSInfo.i18n.magic.php"
 	},
 	"Hooks": {
