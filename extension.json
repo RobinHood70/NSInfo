@@ -12,7 +12,11 @@
 		"MediaWiki": ">= 1.28.0"
 	},
 	"type": "parserhook",
+	"APIListModules": {
+		"nsinfo": "ApiQueryNSInfo"
+	},
 	"AutoloadClasses": {
+		"ApiQueryNSInfo": "includes/ApiQueryNSInfo.php",
 		"NSInfo": "includes/NSInfo.php",
 		"NSInfoHooks": "includes/NSInfoHooks.php",
 		"NSInfoNamespace": "includes/NSInfoNamespace.php",

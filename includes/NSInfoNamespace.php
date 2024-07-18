@@ -3,7 +3,7 @@
 class NSInfoNamespace
 {
 	#region Public Constants
-	public const FIELD_COUNT = 9;
+	public const FIELD_COUNT = 10;
 	#endregion
 
 	#region Private Static Fields
@@ -20,6 +20,9 @@ class NSInfoNamespace
 
 	/** @var bool $gamespace Whether the (pseudo-)namespace counts as being in game space. */
 	private $gamespace = true;
+
+	/** @var string $icon The icon for the namespace. (Currently only applies to mobile app.) */
+	private $icon = '';
 
 	/** @var string $id The shortened text ID of the (pseudo-)namespace. */
 	private $id = '';
@@ -122,6 +125,8 @@ class NSInfoNamespace
 		$nsInfo->parent = $nsInfo->base;
 		$nsInfo->mainPage = $nsInfo->buildMainPage($nsInfo->name);
 		$nsInfo->trail = $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
+		$nsInfo->icon = $nsInfo->getDefaultIcon();
+
 		return $nsInfo;
 	}
 
@@ -166,16 +171,11 @@ class NSInfoNamespace
 		if ($nsInfo->pageName !== '' && strlen($fields[8])) {
 			$nsInfo->modParent = $fields[8];
 		}
+		$nsInfo->icon = strlen($fields[9])
+			? $fields[9]
+			: $nsInfo->getDefaultIcon();
 
 		return $nsInfo;
-	}
-
-	public function getDefaultGamespace()
-	{
-		// The IDs listed are the preferred custom namespace ranges for all wikis and are not UESP-specific. The idea here is to make the "No" namespaces explicit in the table.
-		$id = $this->nsId;
-		return ($id >= 100 && $id < 200) ||
-			($id >= 3000 && $id < 5000);
 	}
 	#endregion
 
@@ -209,6 +209,19 @@ class NSInfoNamespace
 		return $this->category;
 	}
 
+	public function getDefaultGamespace()
+	{
+		// The IDs listed are the preferred custom namespace ranges for all wikis and are not UESP-specific. The idea here is to make the "No" namespaces explicit in the table.
+		$id = $this->nsId;
+		return ($id >= 100 && $id < 200) ||
+			($id >= 3000 && $id < 5000);
+	}
+
+	public function getDefaultIcon(): string
+	{
+		return "{$this->id}-icon-HeaderIcon.jpg";
+	}
+
 	public function getFull(): string
 	{
 		if ($this->base === '') {
@@ -221,6 +234,11 @@ class NSInfoNamespace
 	public function getGameSpace(): bool
 	{
 		return $this->gamespace;
+	}
+
+	public function getIcon(): string
+	{
+		return $this->icon;
 	}
 
 	public function getId(): string
@@ -261,14 +279,14 @@ class NSInfoNamespace
 		return $this->nsId;
 	}
 
-	public function getParent(): string
-	{
-		return $this->parent;
-	}
-
 	public function getPageName(): string
 	{
 		return $this->pageName;
+	}
+
+	public function getParent(): string
+	{
+		return $this->parent;
 	}
 
 	/**
@@ -284,6 +302,11 @@ class NSInfoNamespace
 	public function getTrail(): string
 	{
 		return $this->trail;
+	}
+
+	public function isPseudoSpace(): bool
+	{
+		return  $this->pageName !== '';
 	}
 	#endregion
 }

@@ -123,6 +123,60 @@ class NSInfo
 	}
 
 	/**
+	 * Gets the namespace info from the relevant MediaWiki-space message.
+	 *
+	 * @return NSInfoNamespace[]
+	 */
+	public static function getNsMessage(): array
+	{
+		$helper = VersionHelper::getInstance();
+		$title = Title::newFromText(self::NSLIST);
+		$text = $helper->getPageText($title) ?? '';
+		$text = preg_match('/\bid=["\']?nsinfo-table["\']?\b.*\|}/s', $text, $matches)
+			? substr(
+				$matches[0],
+				0,
+				strlen($matches[0]) - 3
+			)
+			: '';
+		$rows = explode("\n|-", $text);
+		$retval = [];
+		$pseudoSpaceSets = [];
+		if ($rows) {
+			array_shift($rows);
+			foreach ($rows as $row) {
+				$newRow = explode(
+					"\n",
+					$row,
+					2
+				);
+				$newRow = $newRow[count($newRow) - 1];
+				$ns = NSInfoNamespace::fromRow($newRow);
+				$nsId = $ns->getNsId();
+				if ($nsId !== false) {
+					$retval[$ns->getId()] = $ns;
+					if (
+						$ns->getPageName() === ''
+					) {
+						$retval[$nsId] = $ns;
+					} else {
+						$pseudoSpaceSets[$nsId][] = $ns;
+					}
+				}
+			}
+
+			foreach ($pseudoSpaceSets as $nsId => $pseudoSpaces) {
+				if ($nsId !== false) {
+					$retval[$nsId]->addPseudoSpaces($pseudoSpaces);
+				}
+			}
+		}
+
+		#RHDebug::show('Retval', $retval);
+		return $retval;
+	}
+
+	/**
 	 * Tries to get an NSInfoNamespace from a namespace name, namespace index, ns_base, or ns_id. Returns the empty
 	 * namespace if the argument doesn't correspond to a recognized value.
 	 *
@@ -275,50 +329,6 @@ class NSInfo
 		}
 
 		return self::nsFromTitle($title);
-	}
-
-	/**
-	 * Gets the namespace info from the relevant MediaWiki-space message.
-	 *
-	 * @return NSInfoNamespace[]
-	 */
-	private static function getNsMessage(): array
-	{
-		$helper = VersionHelper::getInstance();
-		$title = Title::newFromText(self::NSLIST);
-		$text = $helper->getPageText($title) ?? '';
-		$text = preg_match('/\bid=["\']?nsinfo-table["\']?\b.*\|}/s', $text, $matches)
-			? substr($matches[0], 0, strlen($matches[0]) - 3)
-			: '';
-		$rows = explode("\n|-", $text);
-		$retval = [];
-		$pseudoSpaceSets = [];
-		if ($rows) {
-			array_shift($rows);
-			foreach ($rows as $row) {
-				$newRow = explode("\n", $row, 2);
-				$newRow = $newRow[count($newRow) - 1];
-				$ns = NSInfoNamespace::fromRow($newRow);
-				$nsId = $ns->getNsId();
-				if ($nsId !== false) {
-					$retval[$ns->getId()] = $ns;
-					if ($ns->getPageName() === '') {
-						$retval[$nsId] = $ns;
-					} else {
-						$pseudoSpaceSets[$nsId][] = $ns;
-					}
-				}
-			}
-
-			foreach ($pseudoSpaceSets as $nsId => $pseudoSpaces) {
-				if ($nsId !== false) {
-					$retval[$nsId]->addPseudoSpaces($pseudoSpaces);
-				}
-			}
-		}
-
-		// RHDebug::show('Retval', $retval);
-		return $retval;
 	}
 	#endregion
 }
