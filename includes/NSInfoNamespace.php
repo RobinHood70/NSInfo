@@ -246,6 +246,11 @@ class NSInfoNamespace
 		return $this->id;
 	}
 
+	public function getIsPseudoSpace(): bool
+	{
+		return  $this->pageName !== '';
+	}
+
 	public function getMainPage(): string
 	{
 		return $this->mainPage;
@@ -302,11 +307,6 @@ class NSInfoNamespace
 	public function getTrail(): string
 	{
 		return $this->trail;
-	}
-
-	public function isPseudoSpace(): bool
-	{
-		return  $this->pageName !== '';
 	}
 	#endregion
 }
