@@ -13,7 +13,8 @@ class NSInfo
 	public const NA_NS_BASE = 'ns_base';
 	public const NA_NS_ID = 'ns_id';
 
-	public const PF_GAMESPACE = 'GAMESPACE';
+	public const PF_ISGAMESPACE = 'ISGAMESPACE';
+	public const PF_ISMODSPACE = 'ISMODSPACE';
 	public const PF_MOD_NAME = 'MOD_NAME';
 	public const PF_MOD_PARENT = 'MOD_PARENT';
 	public const PF_NS_BASE = 'NS_BASE';
@@ -38,10 +39,16 @@ class NSInfo
 	#endregion
 
 	#region Public Static Functions
-	public static function doGameSpace(Parser $parser, PPFrame $frame, ?array $args = null): bool
+	public static function doIsGameSpace(Parser $parser, PPFrame $frame, ?array $args = null): bool
 	{
 		$ns = self::getNsInfo($parser, $frame, $args);
-		return $ns->getGameSpace();
+		return $ns->getIsGameSpace();
+	}
+
+	public static function doIsModSpace(Parser $parser, PPFrame $frame, ?array $args = null): bool
+	{
+		$ns = self::getNsInfo($parser, $frame, $args);
+		return $ns->getIsModSpace();
 	}
 
 	public static function doModName(Parser $parser, PPFrame $frame, ?array $args = null): string

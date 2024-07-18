@@ -3,7 +3,7 @@
 class NSInfoNamespace
 {
 	#region Public Constants
-	public const FIELD_COUNT = 10;
+	public const FIELD_COUNT = 11;
 	#endregion
 
 	#region Private Static Fields
@@ -18,14 +18,17 @@ class NSInfoNamespace
 	/** @var string $category The text to be used in category names. */
 	private $category = '';
 
-	/** @var bool $gamespace Whether the (pseudo-)namespace counts as being in game space. */
-	private $gamespace = true;
-
 	/** @var string $icon The icon for the namespace. (Currently only applies to mobile app.) */
 	private $icon = '';
 
 	/** @var string $id The shortened text ID of the (pseudo-)namespace. */
 	private $id = '';
+
+	/** @var bool $isGameSpace Whether the (pseudo-)namespace counts as being in game space. */
+	private $isGameSpace = true;
+
+	/** @var bool $isModSpace Whether the (pseudo-)namespace counts as being in mod space. */
+	private $isModSpace = false;
 
 	/** @var string $mainPage The main page for the (pseudo-)namespace. */
 	private $mainPage = '';
@@ -119,7 +122,7 @@ class NSInfoNamespace
 		}
 
 		$nsInfo->category = strtr($nsInfo->base, ':', '-');
-		$nsInfo->gamespace = $nsInfo->getDefaultGamespace();
+		$nsInfo->isGameSpace = $nsInfo->getDefaultGamespace();
 		$nsInfo->id = $nsInfo->base;
 		$nsInfo->name = $nsInfo->base;
 		$nsInfo->parent = $nsInfo->base;
@@ -165,7 +168,7 @@ class NSInfoNamespace
 		$nsInfo->trail = strlen($fields[6])
 			? $fields[6]
 			: $nsInfo->buildTrail($nsInfo->mainPage, $nsInfo->name);
-		$nsInfo->gamespace = strlen($fields[7])
+		$nsInfo->isGameSpace = strlen($fields[7])
 			? filter_var($fields[7], FILTER_VALIDATE_BOOLEAN)
 			: $nsInfo->getDefaultGamespace();
 		if ($nsInfo->pageName !== '' && strlen($fields[8])) {
@@ -174,6 +177,9 @@ class NSInfoNamespace
 		$nsInfo->icon = strlen($fields[9])
 			? $fields[9]
 			: $nsInfo->getDefaultIcon();
+		$nsInfo->isModSpace = strlen($fields[10])
+			? filter_var($fields[10], FILTER_VALIDATE_BOOLEAN)
+			: false;
 
 		return $nsInfo;
 	}
@@ -219,7 +225,7 @@ class NSInfoNamespace
 
 	public function getDefaultIcon(): string
 	{
-		return "{$this->id}-icon-HeaderIcon.jpg";
+		return "{$this->id}-icon-HeaderIcon.svg";
 	}
 
 	public function getFull(): string
@@ -231,11 +237,6 @@ class NSInfoNamespace
 		return $this->base . (strlen($this->pageName) ? '/' : ':');
 	}
 
-	public function getGameSpace(): bool
-	{
-		return $this->gamespace;
-	}
-
 	public function getIcon(): string
 	{
 		return $this->icon;
@@ -244,6 +245,16 @@ class NSInfoNamespace
 	public function getId(): string
 	{
 		return $this->id;
+	}
+
+	public function getIsGameSpace(): bool
+	{
+		return $this->isGameSpace;
+	}
+
+	public function getIsModSpace(): bool
+	{
+		return $this->isModSpace;
 	}
 
 	public function getIsPseudoSpace(): bool

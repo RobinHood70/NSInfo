@@ -7,7 +7,8 @@ $magicWords['en'] = [
 	NSInfo::NA_NS_BASE => [1, 'ns_base'],
 	NSInfo::NA_NS_ID => [1, 'ns_id'],
 
-	NSInfo::PF_GAMESPACE => [0, 'GAMESPACE'],
+	NSInfo::PF_ISGAMESPACE => [0, 'GAMESPACE', 'ISGAMESPACE'],
+	NSInfo::PF_ISMODSPACE => [0, 'MODSPACE', 'ISMODSPACE'],
 	NSInfo::PF_MOD_NAME => [0, 'MOD_NAME'],
 	NSInfo::PF_MOD_PARENT => [0, 'MOD_PARENT'],
 	NSInfo::PF_NS_BASE => [0, 'NS_BASE'],

@@ -9,7 +9,8 @@ class NSInfoHooks
 	 */
 	public static function onMagicWordwgVariableIDs(array &$aCustomVariableIds): void
 	{
-		$aCustomVariableIds[] = NSInfo::PF_GAMESPACE;
+		$aCustomVariableIds[] = NSInfo::PF_ISGAMESPACE;
+		$aCustomVariableIds[] = NSInfo::PF_ISMODSPACE;
 		$aCustomVariableIds[] = NSInfo::PF_MOD_NAME;
 		$aCustomVariableIds[] = NSInfo::PF_NS_BASE;
 		$aCustomVariableIds[] = NSInfo::PF_NS_CATEGORY;
@@ -28,7 +29,8 @@ class NSInfoHooks
 	 */
 	public static function onParserFirstCallInit(Parser $parser): void
 	{
-		$parser->setFunctionHook(NSInfo::PF_GAMESPACE, 'NSInfo::doGameSpace', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_ISGAMESPACE, 'NSInfo::doIsGameSpace', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
+		$parser->setFunctionHook(NSInfo::PF_ISMODSPACE, 'NSInfo::doIsModSpace', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_MOD_NAME, 'NSInfo::doModName', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_MOD_PARENT, 'NSInfo::doModParent', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
 		$parser->setFunctionHook(NSInfo::PF_NS_BASE, 'NSInfo::doNsBase', Parser::SFH_OBJECT_ARGS | Parser::SFH_NO_HASH);
@@ -56,8 +58,11 @@ class NSInfoHooks
 	public static function onParserGetVariableValueSwitch(Parser $parser, array &$variableCache, $magicWordId, &$ret, PPFrame $frame): bool
 	{
 		switch ($magicWordId) {
-			case NSInfo::PF_GAMESPACE:
-				$ret = NSInfo::doGameSpace($parser, $frame);
+			case NSInfo::PF_ISGAMESPACE:
+				$ret = NSInfo::doIsGameSpace($parser, $frame);
+				break;
+			case NSInfo::PF_ISMODSPACE:
+				$ret = NSInfo::doIsModSpace($parser, $frame);
 				break;
 			case NSInfo::PF_MOD_NAME:
 				$ret = NSInfo::doModName($parser, $frame);

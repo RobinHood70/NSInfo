@@ -45,38 +45,12 @@ class ApiQueryNSInfo extends ApiQueryBase
 		$nsNamespaces = NSInfo::getNsMessage();
 		$result = $this->getResult();
 		foreach ($nsNamespaces as $key => $ns) {
-			if (is_numeric($key)) {
-				continue;
+			if (!is_numeric($key)) {
+				$data = $this->getApiResult($ns);
+				if ($data !== '') {
+					$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
+				}
 			}
-
-			$icon = $ns->getIcon();
-			$iconTitle = Title::newFromText('File:' . $icon);
-			$iconPage = WikiPage::factory($iconTitle);
-			if ($iconPage instanceof WikiFilePage) {
-				$iconurl = $iconPage->exists()
-					? $iconPage->getFile()->getUrl()
-					: '';
-			}
-
-			$pageName = $ns->getPageName();
-			$data = [
-				'category' => $ns->getCategory(),
-				'full' => $ns->getFull(),
-				'gamespace' => $ns->getGameSpace(),
-				'icon' => $icon,
-				'iconurl' => $iconurl,
-				'id' => $ns->getId(),
-				'mainpage' => $ns->getMainPage(),
-				'modname' => $ns->getModName(),
-				'modparent' => $ns->getModParent(),
-				'name' => $ns->getName(),
-				'nsid' => $ns->getNsId(),
-				'pagename' => $pageName,
-				'parent' => $ns->getParent(),
-				'pseudospace' => $ns->getIsPseudoSpace(),
-				'trail' => $ns->getTrail(),
-			];
-			$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
 		}
 	}
 
@@ -107,4 +81,42 @@ class ApiQueryNSInfo extends ApiQueryBase
 		return 'https://www.uesp.net/wiki/Project:NSInfo#API';
 	}
 	#endregion
+
+	#region PRivate Methods
+	private function getApiResult(NSInfoNamespace $ns)
+	{
+		$icon = $ns->getIcon();
+		$iconTitle = Title::newFromText('File:' . $icon);
+		if (!$iconTitle) {
+			return '';
+		}
+
+		$iconPage = WikiPage::factory($iconTitle);
+		if ($iconPage instanceof WikiFilePage) {
+			$iconurl = $iconPage->exists()
+				? $iconPage->getFile()->getUrl()
+				: '';
+
+			return [
+				'category' => $ns->getCategory(),
+				'full' => $ns->getFull(),
+				'icon' => $icon,
+				'iconurl' => $iconurl,
+				'id' => $ns->getId(),
+				'isgamespace' => $ns->getIsGameSpace(),
+				'ismodspace' => $ns->getIsModSpace(),
+				'ispseudospace' => $ns->getIsPseudoSpace(),
+				'mainpage' => $ns->getMainPage(),
+				'modname' => $ns->getModName(),
+				'modparent' => $ns->getModParent(),
+				'name' => $ns->getName(),
+				'nsid' => $ns->getNsId(),
+				'pagename' => $ns->getPageName(),
+				'parent' => $ns->getParent(),
+				'trail' => $ns->getTrail(),
+			];
+		}
+
+		return '';
+	}
 }
