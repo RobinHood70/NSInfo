@@ -42,10 +42,23 @@ class ApiQueryNSInfo extends ApiQueryBase
 	#region Public Override Functions
 	public function execute()
 	{
+		$allNamespaces = MWNamespace::getCanonicalNamespaces();
 		$nsNamespaces = NSInfo::getNsMessage();
 		$result = $this->getResult();
+
+		foreach ($allNamespaces as $nsId => $nsCanonical) {
+			if (MWNamespace::isSubject($nsId)) {
+				$ns = NSInfo::nsFromArg($nsId);
+				$data = $this->getApiResult($ns);
+				if ($data !== '') {
+					#RHDebug::echo($ns->getBase());
+					$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
+				}
+			}
+		}
+
 		foreach ($nsNamespaces as $key => $ns) {
-			if (!is_numeric($key)) {
+			if ($ns->getIsPseudoSpace()) {
 				$data = $this->getApiResult($ns);
 				if ($data !== '') {
 					$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
