@@ -52,7 +52,7 @@ class ApiQueryNSInfo extends ApiQueryBase
 				$data = $this->getApiResult($ns);
 				if ($data !== '') {
 					#RHDebug::echo($ns->getBase());
-					$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
+					$result->addValue(['query', $this->getModuleName()], null, $data);
 				}
 			}
 		}
@@ -61,7 +61,7 @@ class ApiQueryNSInfo extends ApiQueryBase
 			if ($ns->getIsPseudoSpace()) {
 				$data = $this->getApiResult($ns);
 				if ($data !== '') {
-					$result->addValue(['query', $this->getModuleName()], $ns->getBase(), $data);
+					$result->addValue(['query', $this->getModuleName()], null, $data);
 				}
 			}
 		}
@@ -111,6 +111,7 @@ class ApiQueryNSInfo extends ApiQueryBase
 				: '';
 
 			return [
+				'base' => $ns->getBase(),
 				'category' => $ns->getCategory(),
 				'full' => $ns->getFull(),
 				'icon' => $icon,
