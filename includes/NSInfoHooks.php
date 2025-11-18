@@ -57,8 +57,26 @@ class NSInfoHooks
 	 */
 	public static function onParserGetVariableValueSwitch(Parser $parser, array &$variableCache, $magicWordId, &$ret, PPFrame $frame): bool
 	{
-		$ret = "<span class=error>Due to a MediaWiki change, NSInfo can no longer support plain parser variables like {{NS_EXAMPLE}}. Please use {{NS_EXAMPLE:}} (with a colon) instead.";
-		$parser->addTrackingCategory('nsinfo-tracking-variable');
+		switch ($magicWordId) {
+			case NSInfo::PF_ISGAMESPACE:
+			case NSInfo::PF_ISMODSPACE:
+			case NSInfo::PF_MOD_NAME:
+			case NSInfo::PF_MOD_PARENT:
+			case NSInfo::PF_NS_BASE:
+			case NSInfo::PF_NS_FULL:
+			case NSInfo::PF_NS_ID:
+			case NSInfo::PF_NS_MAINPAGE:
+			case NSInfo::PF_NS_NAME:
+			case NSInfo::PF_NS_PARENT:
+			case NSInfo::PF_NS_TRAIL:
+				$ret = "<span class=error>Due to a MediaWiki change, NSInfo can no longer support plain parser variables like {{NS_EXAMPLE}}. Please use {{NS_EXAMPLE:}} (with a colon) instead.";
+				$parser->addTrackingCategory('nsinfo-tracking-variable');
+				break;
+			case NSInfo::PF_NS_CATEGORY:
+				$ret = "NSInfo-Old NS_CATEGORY call"; // Used only so we're returning something nice; tracking category should be main category for old calls.
+				$parser->addTrackingCategory('nsinfo-tracking-variable');
+				break;
+		}
 
 		return true;
 	}
