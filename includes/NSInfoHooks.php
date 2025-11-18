@@ -57,47 +57,7 @@ class NSInfoHooks
 	 */
 	public static function onParserGetVariableValueSwitch(Parser $parser, array &$variableCache, $magicWordId, &$ret, PPFrame $frame): bool
 	{
-		switch ($magicWordId) {
-			case NSInfo::PF_ISGAMESPACE:
-				$ret = NSInfo::doIsGameSpace($parser, $frame);
-				break;
-			case NSInfo::PF_ISMODSPACE:
-				$ret = NSInfo::doIsModSpace($parser, $frame);
-				break;
-			case NSInfo::PF_MOD_NAME:
-				$ret = NSInfo::doModName($parser, $frame);
-				break;
-			case NSInfo::PF_MOD_PARENT:
-				$ret = NSInfo::doModParent($parser, $frame);
-				break;
-			case NSInfo::PF_NS_BASE:
-				$ret = NSInfo::doNsBase($parser, $frame);
-				break;
-			case NSInfo::PF_NS_CATEGORY:
-				$ret = NSInfo::doNsCategory($parser, $frame);
-				break;
-			case NSInfo::PF_NS_FULL:
-				$ret = NSInfo::doNsFull($parser, $frame);
-				break;
-			case NSInfo::PF_NS_ID:
-				$ret = NSInfo::doNsId($parser, $frame);
-				break;
-			case NSInfo::PF_NS_MAINPAGE:
-				$ret = NSInfo::doNsMainPage($parser, $frame);
-				break;
-			case NSInfo::PF_NS_NAME:
-				$ret = NSInfo::doNsName($parser, $frame);
-				break;
-			case NSInfo::PF_NS_PARENT:
-				$ret = NSInfo::doNsParent($parser, $frame);
-				break;
-			case NSInfo::PF_NS_TRAIL:
-				$ret = NSInfo::doNsTrail($parser, $frame);
-				break;
-			default:
-				return true;
-		}
-
+		$ret = "<span class=error>Due to a MediaWiki change, NSInfo can no longer support plain parser variables like {{NS_EXAMPLE}}. Please use {{NS_EXAMPLE:}} (with a colon) instead.";
 		$parser->addTrackingCategory('nsinfo-tracking-variable');
 
 		return true;
