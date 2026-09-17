@@ -148,8 +148,8 @@ class NSInfo
 			: '';
 		$rows = explode("\n|-", $text);
 		$retval = [];
-		$pseudoSpaceSets = [];
 		if ($rows) {
+			$pseudoSpaceSets = [];
 			array_shift($rows);
 			foreach ($rows as $row) {
 				$newRow = explode(
@@ -174,6 +174,11 @@ class NSInfo
 
 			foreach ($pseudoSpaceSets as $nsId => $pseudoSpaces) {
 				if ($nsId !== false) {
+					if (!isset($retval[$nsId])) {
+						// In the rare event that we haven't processed the base namespace yet, create it.
+						$retval[$nsId] = NSInfoNamespace::fromNamespace($nsId);
+					}
+
 					$retval[$nsId]->addPseudoSpaces($pseudoSpaces);
 				}
 			}
